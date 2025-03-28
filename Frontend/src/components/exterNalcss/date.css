@@ -1,0 +1,25 @@
+/* @import "rsuite/dist/rsuite.css";
+@import "rsuite/dist/rsuite.min.css";
+.rs-picker-input-group {
+  background-color: transparent !important;
+}
+
+.rs-input {
+  background-color: transparent !important;
+}
+
+.rs-picker-popup {
+  @apply border bg-white dark:bg-neutral-950 !important;
+}
+
+.rs-calendar-body,
+.rs-calendar-btn-close,
+div.rs-calendar-time-dropdown.show,
+.rs-calendar-time-dropdown-column,
+.rs-calendar-time-dropdown-row,
+.rs-calendar-time-dropdown-content {
+  @apply bg-white dark:bg-neutral-950 !important;
+}
+.rs-anim-fade.rs-anim-in.placement-bottom-start.rs-picker-popup-date.rs-picker-popup {
+  z-index: 9999;
+} */

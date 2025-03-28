@@ -1,0 +1,24 @@
+
+
+.e-richtexteditor .e-rte-content .e-content,
+.e-richtexteditor .e-source-content .e-content {
+    @apply bg-white dark:bg-neutral-950 text-black dark:text-white !important;
+}
+
+.e-toolbar .e-toolbar-items{
+    @apply bg-white dark:bg-neutral-950 text-black dark:text-white !important;
+    border: none;
+}
+
+.e-rte-toolbar.e-control[class*=e-toolbar], .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar.e-control[class*=e-toolbar]
+{
+    @apply bg-white dark:bg-neutral-950 text-black dark:text-white !important;
+}
+
+.e-richtexteditor .e-rte-toolbar .e-toolbar-items .e-toolbar-item .e-dropdown-btn, .e-richtexteditor .e-rte-toolbar .e-toolbar-extended .e-toolbar-item .e-dropdown-btn, .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-items .e-toolbar-item .e-dropdown-btn, .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-extended .e-toolbar-item .e-dropdown-btn{
+    @apply bg-white dark:bg-neutral-950 text-black dark:text-white !important;
+}
+
+.e-richtexteditor .e-rte-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn .e-order-list.e-icons, .e-richtexteditor .e-rte-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn .e-unorder-list.e-icons, .e-richtexteditor .e-rte-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn .e-icons.e-btn-icon:not(.e-caret), .e-richtexteditor .e-rte-toolbar .e-toolbar-extended .e-toolbar-item .e-tbar-btn .e-order-list.e-icons, .e-richtexteditor .e-rte-toolbar .e-toolbar-extended .e-toolbar-item .e-tbar-btn .e-unorder-list.e-icons, .e-richtexteditor .e-rte-toolbar .e-toolbar-extended .e-toolbar-item .e-tbar-btn .e-icons.e-btn-icon:not(.e-caret), .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn .e-order-list.e-icons, .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn .e-unorder-list.e-icons, .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn .e-icons.e-btn-icon:not(.e-caret), .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-extended .e-toolbar-item .e-tbar-btn .e-order-list.e-icons, .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-extended .e-toolbar-item .e-tbar-btn .e-unorder-list.e-icons, .e-richtexteditor .e-rte-toolbar.e-toolbar.e-extended-toolbar .e-toolbar-extended .e-toolbar-item .e-tbar-btn .e-icons.e-btn-icon:not(.e-caret){
+    @apply bg-white dark:bg-neutral-950 text-black dark:text-white !important;
+}

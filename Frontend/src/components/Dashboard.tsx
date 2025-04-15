@@ -32,13 +32,10 @@ interface User {
 }
 
 interface Counts {
-  totalPosts: number;
-  totalJobOpenings: number;
-  applicationsCount: number;
-  shortlistedCandidates: number;
-  onboardCount: number;
-  totalCandidates: number;
-  archivedCandidates: number;
+  totalOrders: number;
+  mostCookedItem: number;
+  saleToday: number;
+  tableTurnsToday: number;
 }
 
 interface ChartData {
@@ -50,13 +47,10 @@ interface ChartData {
 export const Dashboard: FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [counts, setCounts] = useState<Counts>({
-    totalPosts: 0,
-    totalJobOpenings: 0,
-    applicationsCount: 0,
-    shortlistedCandidates: 0,
-    onboardCount: 0,
-    totalCandidates: 0,
-    archivedCandidates: 0,
+    totalOrders: 0,
+    mostCookedItem: 0,
+    saleToday: 0,
+    tableTurnsToday: 0,
   });
   const [loading, setLoading] = useState(false);
   const [areaChartData, setAreaChartData] = useState<ChartData[]>([]);
@@ -86,24 +80,16 @@ export const Dashboard: FC = () => {
     setLoading(true);
     try {
 
-      const jobOpeningsQuery = query(collection(db, "Posts"), where("publish", "==", true));
-
-      const postsSnapshot = await getDocs(collection(db, "Posts"));
-      const jobOpeningsSnapshot = await getDocs(jobOpeningsQuery);
-      const applicationsSnapshot = await getDocs(collection(db, "CandidateInfo"));
-      const shortlistedSnapshot = await getDocs(collection(db, "ShortlistedCandidatesData"));
-      const onboardSnapshot = await getDocs(collection(db, "OnBoardingCandidates"));
-      const archivedCandidatesSnapshot = await getDocs(collection(db, "ArchivedCandidatesData"));
-      const totalCandidates = shortlistedSnapshot.size + applicationsSnapshot.size + archivedCandidatesSnapshot.size;
+      const orderSnapshot = await getDocs(collection(db, "Orders"));
+      const cookedItemSnapshot = await getDocs(collection(db, "Orders"));
+      const saleSnapshot = await getDocs(collection(db, "Sales"));
+      const tableTurnSnapshot = await getDocs(collection(db, "TableTurns"));
 
       setCounts({
-        totalPosts: postsSnapshot.size,
-        totalJobOpenings: jobOpeningsSnapshot.size,
-        applicationsCount: applicationsSnapshot.size,
-        shortlistedCandidates: shortlistedSnapshot.size,
-        onboardCount: onboardSnapshot.size,
-        totalCandidates: totalCandidates,
-        archivedCandidates: archivedCandidatesSnapshot.size,
+        totalOrders: orderSnapshot.size,
+        mostCookedItem: cookedItemSnapshot.size,
+        saleToday: saleSnapshot.size,
+        tableTurnsToday: tableTurnSnapshot.size,
       });
 
     } catch (error) {
@@ -117,7 +103,7 @@ export const Dashboard: FC = () => {
     fetchCounts();
   }, [fetchCounts]);
 
-  const fetchPostCountsLast6Months = async () => {
+  const fetchOrderCountLast6Months = async () => {
     const currentDate = new Date();
     const postCounts = new Array(6).fill(0);
     const publishedPostCounts = new Array(6).fill(0);
@@ -170,7 +156,7 @@ export const Dashboard: FC = () => {
   }
 
   useEffect(() => {
-    fetchPostCountsLast6Months().then((counts) => {
+    fetchOrderCountLast6Months().then((counts) => {
       if (counts) {
         const areaChartData = counts.postCounts.map((posts, idx) => ({
           month: new Date(new Date().setMonth(new Date().getMonth() - (5 - idx))).toLocaleString('default', { month: 'long' }),
@@ -185,8 +171,8 @@ export const Dashboard: FC = () => {
   }, []);
 
   const chartData = [
-    { category: "applied", count: counts.applicationsCount, fill: "hsl(var(--chart-1))" },
-    { category: "shortlisted", count: counts.shortlistedCandidates, fill: "hsl(var(--chart-2))" },
+    { category: "new", count: counts.applicationsCount, fill: "hsl(var(--chart-1))" },
+    { category: "returning", count: counts.shortlistedCandidates, fill: "hsl(var(--chart-2))" },
   ]
 
   const chartConfig = {
@@ -215,10 +201,10 @@ export const Dashboard: FC = () => {
             </h1>
           </div>
           <div className=" grid gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
-            <StatsCard title="Total Orders Served" count={counts.totalPosts} icon="ListOrdered" />
-            <StatsCard title="Most-cooked Item" count={counts.onboardCount} icon="Soup" />
-            <StatsCard title="Sale Today" count={counts.totalJobOpenings} icon="IndianRupee"/>
-            <StatsCard title="Table Turns Today" count={counts.totalCandidates} icon="UsersRound" />
+            <StatsCard title="Total Orders Served" count={counts.totalOrders} icon="ListOrdered" />
+            <StatsCard title="Most-cooked Item" count={counts.mostCookedItem} icon="Soup" />
+            <StatsCard title="Sale Today" count={counts.saleToday} icon="IndianRupee"/>
+            <StatsCard title="Table Turns Today" count={counts.tableTurnsToday} icon="UsersRound" />
           </div>
           <div className="grid gap-4 md:gap-8 grid-cols-2">
           <Card className="flex flex-col">

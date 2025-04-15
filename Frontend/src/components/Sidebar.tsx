@@ -60,8 +60,8 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
           Menu Manager
         </Link>
         <Link
-          to="/manage-orders"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "shortlisted-candidates" ? "bg-muted text-primary" : "text-muted-foreground"}`}
+          to="/orders"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "order-manager" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
           <UserRoundCheck className="h-4 w-4" />
           Order Manager

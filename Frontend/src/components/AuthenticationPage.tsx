@@ -7,7 +7,7 @@ import { auth } from '../Database/FirebaseConfig';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider , onAuthStateChanged } from 'firebase/auth';
 import { Eye, EyeOff } from 'lucide-react'; 
 import authSideImage from "../assets/authSideImage.png";
-import workHat from "../assets/Document.png";
+import logo from "../assets/HotelShripad.png";
 // import Swal from 'sweetalert2';
 // import { useTheme } from './theme-provider';
 
@@ -61,6 +61,7 @@ export const SignIn: FC = () => {
       // });
       navigate('/dashboard');
     } catch (error) {
+      console.error(error);
       setError('Invalid email or password.');
       // Swal.fire({
       //   ...sweetAlertOptions,
@@ -92,6 +93,7 @@ export const SignIn: FC = () => {
       // });
       navigate('/dashboard');
     } catch (error) {
+      console.error(error);
       setError('Failed to sign in with Google.');
       // Swal.fire({
       //   ...sweetAlertOptions,
@@ -111,7 +113,7 @@ export const SignIn: FC = () => {
           alt="Image"
           className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
-        <img src={workHat} className="absolute left-10 top-10 h-12 w-auto" />
+        <img src={logo} alt="Logo" className="absolute left-10 top-10 h-24 w-auto" />
       </div>
       {/* Form Section */}
       <div className="flex items-center justify-center h-screen">
@@ -129,7 +131,7 @@ export const SignIn: FC = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="jhon@youremail.in"
+                placeholder="john@youremail.in"
                 value={email}
                 onChange={handleEmailChange}
                 required

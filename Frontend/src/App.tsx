@@ -10,6 +10,8 @@ import { EditProfile } from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './components/404';
 import { ManageMenu } from './components/MenuManager';
+import { ManageOrders } from './components/OrderManager';
+import { FoodOrderingPage } from './components/FoodOrderPage';
 
 const App: React.FC = () => {
   return (
@@ -24,6 +26,8 @@ const App: React.FC = () => {
           <Route path="/profile" element={<EditProfile/>} />
           <Route path="/login" element={  <SignIn/> } />
           <Route path="/signup" element={ <SignUpForm/>} />
+          <Route path="/orders" element={ <ManageOrders/>} />
+          <Route path="/food-order" element={ <FoodOrderingPage/>} />
           <Route path="/page-not-found" element={ <NotFound/>} />
           <Route path="*" element={<SignIn />} />
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute> } />

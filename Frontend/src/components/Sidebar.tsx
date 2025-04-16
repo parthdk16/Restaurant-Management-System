@@ -67,11 +67,11 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
           Order Manager
         </Link>
         <Link
-          to="/archived-candidates"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "archived-candidates" ? "bg-muted text-primary" : "text-muted-foreground"}`}
+          to="/history"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "transaction-history" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
           <UserRoundX className="h-4 w-4" />
-          Billing Manager
+          Transactions
         </Link>
         <Link
           to="/rounds"

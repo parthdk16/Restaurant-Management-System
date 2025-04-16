@@ -12,6 +12,8 @@ import NotFound from './components/404';
 import { ManageMenu } from './components/MenuManager';
 import { ManageOrders } from './components/OrderManager';
 import { FoodOrderingPage } from './components/FoodOrderPage';
+import { TableOrderPage } from './components/TableOrder';
+import { TransactionHistory } from './components/Transactions';
 
 const App: React.FC = () => {
   return (
@@ -28,6 +30,8 @@ const App: React.FC = () => {
           <Route path="/signup" element={ <SignUpForm/>} />
           <Route path="/orders" element={ <ManageOrders/>} />
           <Route path="/food-order" element={ <FoodOrderingPage/>} />
+          <Route path="/history" element={ <TransactionHistory/>} />
+          <Route path="/dinein-orders" element={ <TableOrderPage/>} />
           <Route path="/page-not-found" element={ <NotFound/>} />
           <Route path="*" element={<SignIn />} />
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute> } />

@@ -79,6 +79,7 @@ export const ManageTables: FC = () => {
         tableNo: count,
         createdBy: user?.email,
         createdAt: new Date(),
+        status: 'available',
       };
       console.log(tableData);
 
@@ -110,6 +111,13 @@ export const ManageTables: FC = () => {
       const tableList = tableSnapshot.docs.map((doc) => ({
         ...doc.data(),
       })) as Table[];
+
+      tableList.sort((a, b) => {
+        if (a.tableNo < b.tableNo) return -1;
+        if (a.tableNo > b.tableNo) return 1;
+        return 0;
+      });
+
       setTables(tableList);
     } catch (error) {
       console.error("Error fetching tables: ", error);

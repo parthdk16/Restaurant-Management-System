@@ -36,9 +36,9 @@ interface MenuItem {
   category: string;
   photoURL?: string;
   photoKey?: string;
-  available: boolean;
-  veg: boolean;
-  itemCode?: string; // Added item code
+  isAvailable: boolean;
+  isVegetarian: boolean;
+  itemCode?: string; 
 }
 
 interface User {
@@ -120,6 +120,7 @@ export const ManageMenu: FC = () => {
       
       setMenuItems(menuList);
       setFilteredItems(menuList);
+      console.log('MenuList: ',menuList);
     } catch (error) {
       console.error("Error fetching menu items: ", error);
     } finally {
@@ -148,13 +149,13 @@ export const ManageMenu: FC = () => {
     // Filter by availability
     if (filterOptions.availabilityFilter) {
       const isAvailable = filterOptions.availabilityFilter === "available";
-      result = result.filter(item => item.available === isAvailable);
+      result = result.filter(item => item.isAvailable === isAvailable);
     }
     
     // Filter by veg/non-veg
     if (filterOptions.vegFilter) {
       const isVeg = filterOptions.vegFilter === "veg";
-      result = result.filter(item => item.veg === isVeg);
+      result = result.filter(item => item.isVegetarian === isVeg);
     }
     
     setFilteredItems(result);
@@ -183,8 +184,8 @@ export const ManageMenu: FC = () => {
     setDescription(item.description);
     setPrice(item.price);
     setCategory(item.category);
-    setVeg(item.veg);
-    setAvailable(item.available);
+    setVeg(item.isVegetarian);
+    setAvailable(item.isAvailable);
     setPhotoURL(item.photoURL || "");
     setPhotoKey(item.photoKey || "");
     setItemCode(item.itemCode || "");
@@ -697,11 +698,11 @@ export const ManageMenu: FC = () => {
                       <p className="font-semibold">Price: ₹{item.price.toFixed(2)}</p>
                       <p>Category: {item.category}</p>
                       <div className="flex space-x-2 text-sm">
-                        <span className={`px-2 py-1 rounded ${item.veg ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'}`}>
-                          {item.veg ? 'Vegetarian' : 'Non-vegetarian'}
+                        <span className={`px-2 py-1 rounded ${item.isVegetarian ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'}`}>
+                          {item.isVegetarian ? 'Vegetarian' : 'Non-vegetarian'}
                         </span>
-                        <span className={`px-2 py-1 rounded ${item.available ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'}`}>
-                          {item.available ? 'Available' : 'Unavailable'}
+                        <span className={`px-2 py-1 rounded ${item.isAvailable ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'}`}>
+                          {item.isAvailable ? 'Available' : 'Unavailable'}
                         </span>
                       </div>
                     </div>

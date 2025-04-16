@@ -2,11 +2,9 @@ import { FC, useEffect, useState, useCallback } from "react";
 import {  useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Loader1 from "./Loader";
 import { auth, db } from "../Database/FirebaseConfig";
 import { Sidebar } from "./Sidebar";
-import { Label } from "@radix-ui/react-label";
 import { collection, setDoc, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { TableCard } from "./TableCard";
 import 'react-quill/dist/quill.snow.css';
@@ -28,6 +26,7 @@ interface Table {
   tableId: string;
   tableNo: number;
   title: string;
+  status: string;
   createdBy: string;
   createdAt: Date;
 }
@@ -36,7 +35,6 @@ export const ManageTables: FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [tables, setTables] = useState<Table[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   const { theme } = useTheme();
@@ -168,52 +166,41 @@ export const ManageTables: FC = () => {
       <div className="flex flex-col h-screen">
         <Header/>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
-          <div className="flex items-center">
+          <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl text-primary font-bold">Tables</h1>
+            <div>
+              <Button onClick={addTable}>
+                Add new table <Plus/>
+              </Button>
+            </div>
           </div>
-            <div className="flex flex-row gap-4 items-center">
-              <div className="w-1/2 grid grid-col gap-y-2">
-                <Label className="text-left font-semibold">Search</Label>
-                <Input
-                  type="text"
-                  placeholder="Search Tables..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
-                />
+          <div className="w-full flex flex-wrap place-self-center relative justify-center">
+            {loading ? (
+              <div className="absolute items-center justify-center bg-opacity-50 z-10">
+                <Loader1 />
               </div>
-              <div className="justify-end">
-                <Button onClick={addTable}>
-                  Add new table <Plus/>
-                </Button>
+            ) : tables.length === 0 ? (
+              <p className="text-lg font-semibold text-gray-700 mt-0 text-left">
+                        <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                          "Your next great service is just a table away!"
+                        </span>
+                      </p>
+            ) : (
+              <div className="justify-center grid gap-x-16 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-24 lg:gap-y-3">
+                {tables.map((table) => (
+                  <TableCard
+                    id={table.tableId}
+                    tableNo={table.tableNo}
+                    title={"Table "+table.tableNo}
+                    createdBy={table.createdBy}
+                    status={table.status}
+                    createdAt={new Date(table.createdAt).toLocaleDateString()}
+                    onDelete={handleDelete}
+                  />
+                ))}
               </div>
-            </div>
-            <div className="w-full flex flex-wrap place-self-center relative justify-center">
-              {loading ? (
-                <div className="absolute items-center justify-center bg-opacity-50 z-10">
-                  <Loader1 />
-                </div>
-              ) : tables.length === 0 ? (
-                <p className="text-lg font-semibold text-gray-700 mt-0 text-left">
-                          <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                            "Your next great service is just a table away!"
-                          </span>
-                        </p>
-              ) : (
-                <div className="justify-center grid gap-x-16 gap-y-4 grid-cols-2 md:grid-cols-3 md:gap-y-4 md:gap-x-16 lg:grid-cols-3 lg:gap-x-24 lg:gap-y-3">
-                  {tables.map((table) => (
-                    <TableCard
-                      id={table.tableId}
-                      tableNo={table.tableNo}
-                      title={"Table "+table.tableNo}
-                      createdBy={table.createdBy}
-                      createdAt={new Date(table.createdAt).toLocaleDateString()}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
+          </div>
         </main>
       </div>
     </div>

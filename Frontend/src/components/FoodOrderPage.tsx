@@ -43,6 +43,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ScrollArea } from "./ui/scroll-area";
+import QRImg from '@/assets/QR.png'
 
 interface FoodItem {
   id: string;
@@ -1150,7 +1151,7 @@ export const FoodOrderingPage: FC = () => {
             {paymentMode === 'qr' && showQrCode && (
               <div className="flex flex-col items-center p-4 border rounded-lg">
                 <div className="bg-white p-4 rounded-lg mb-3">
-                  <img src="/api/placeholder/250/250" alt="QR Code for payment" className="w-full" />
+                  <img src={QRImg} alt="QR Code for payment" className="w-full" />
                 </div>
                 <p className="text-sm text-center mb-4">Scan this QR code to pay ₹{total.toFixed(2)}</p>
                 <Button 
@@ -1260,7 +1261,7 @@ const FoodItemCard: FC<{
       </CardHeader>
       
       <CardContent className="pb-2">
-        <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
+        <p className="text-sm text-gray-500 line-clamp-2" dangerouslySetInnerHTML={{ __html: item.description }} />
         <p className="text-lg font-semibold mt-2">₹{item.price.toFixed(2)}</p>
       </CardContent>
       

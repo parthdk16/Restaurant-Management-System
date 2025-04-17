@@ -16,12 +16,12 @@ import {
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/Database/FirebaseConfig"; // Ensure your firebase config is set up correctly
+import { addDoc, collection, deleteDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { db } from "@/Database/FirebaseConfig";
 
 // Define the MenuItem type based on Firestore structure
 interface MenuItem {
-  uniqueId: string;
+  itemCode: number;
   name: string;
   category: string;
   description: string;
@@ -32,7 +32,7 @@ interface MenuItem {
 }
 
 interface OrderItem {
-  id: string;
+  id: number;
   name: string;
   price: number;
   quantity: number;
@@ -54,6 +54,7 @@ const TAX_RATE = 0.08; // 8% tax rate
 export function TableCard({
   id,
   title,
+  tableNo,
   status: initialStatus,
   onDelete,
   onStatusChange
@@ -75,6 +76,105 @@ export function TableCard({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<MenuItem[]>([]);
   const [activeView, setActiveView] = useState<"category" | "search">("category");
+
+  // On component mount
+  useEffect(() => {
+    const fetchTableOrders = async () => {
+      try {
+        const tableOrdersCollection = collection(db, "TableOrders");
+        const orderSnapshot = await getDocs(query(tableOrdersCollection, where("tableId", "==", id)));
+        
+        if (!orderSnapshot.empty) {
+          const orderData = orderSnapshot.docs[0].data();
+          setStatus(orderData.status);
+          setCustomerName(orderData.customerName);
+          setNumberOfGuests(orderData.numberOfGuests);
+          setOrderItems(orderData.items);
+        }
+      } catch (error) {
+        console.error("Error fetching table orders:", error);
+      }
+    };
+    
+    fetchTableOrders();
+  }, [id]);
+
+  // Function to save table order data
+  const saveTableOrder = async () => {
+    try {
+      const tableOrdersCollection = collection(db, "TableOrders");
+      const orderSnapshot = await getDocs(query(tableOrdersCollection, where("tableId", "==", id)));
+      
+      const orderData = {
+        tableId: id,
+        tableNo: tableNo,
+        status: status,
+        customerName: customerName,
+        numberOfGuests: numberOfGuests,
+        items: orderItems,
+        timestamp: new Date()
+      };
+      
+      if (orderSnapshot.empty) {
+        // Create new order
+        await addDoc(tableOrdersCollection, orderData);
+      } else {
+        // Update existing order
+        const docRef = orderSnapshot.docs[0].ref;
+        await updateDoc(docRef, orderData);
+      }
+    } catch (error) {
+      console.error("Error saving table order:", error);
+    }
+  };
+
+  // Call saveTableOrder whenever order data changes
+  useEffect(() => {
+    if (status === "occupied" && (customerName || orderItems.length > 0)) {
+      saveTableOrder();
+    }
+  }, [status, customerName, numberOfGuests, orderItems]);
+
+  // When table is billed, move data to completed orders
+  const completeOrder = async () => {
+    try {
+      // 1. Create completed order record
+      const completedOrdersCollection = collection(db, "CompletedOrders");
+      await addDoc(completedOrdersCollection, {
+        tableId: id,
+        tableNo: tableNo,
+        customerName: customerName,
+        numberOfGuests: numberOfGuests,
+        items: orderItems,
+        subtotal: calculateSubtotal(),
+        tax: calculateTax(),
+        total: calculateTotal(),
+        timestamp: new Date(),
+        splitAmount: splitBill > 1 ? (calculateTotal() / splitBill) : null,
+        splitCount: splitBill
+      });
+      
+      // 2. Delete the active table order
+      const tableOrdersCollection = collection(db, "TableOrders");
+      const orderSnapshot = await getDocs(query(tableOrdersCollection, where("tableId", "==", id)));
+      if (!orderSnapshot.empty) {
+        const docRef = orderSnapshot.docs[0].ref;
+        await deleteDoc(docRef);
+      }
+      
+      // 3. Reset local state
+      setStatus("available");
+      setOrderItems([]);
+      setCustomerName("");
+      setNumberOfGuests(1);
+      setShowBill(false);
+      setCurrentTab("status");
+      setIsDialogOpen(false);
+      onStatusChange(id, "available");
+    } catch (error) {
+      console.error("Error completing order:", error);
+    }
+  };
 
   // Fetch menu items from Firestore
   useEffect(() => {
@@ -151,8 +251,7 @@ export function TableCard({
   };
 
   const addItemToOrder = (item: MenuItem) => {
-    console.log("Adding item to order:", item);
-    const existingItemIndex = orderItems.findIndex(orderItem => orderItem.id === item.uniqueId);
+    const existingItemIndex = orderItems.findIndex(orderItem => orderItem.name === item.name);
     
     if (existingItemIndex >= 0) {
       const updatedItems = [...orderItems];
@@ -160,7 +259,7 @@ export function TableCard({
       setOrderItems(updatedItems);
     } else {
       setOrderItems([...orderItems, {
-        id: item.uniqueId,
+        id: item.itemCode,
         name: item.name,
         price: item.price,
         quantity: 1,
@@ -169,7 +268,7 @@ export function TableCard({
     }
   };
 
-  const updateItemQuantity = (itemId: string, change: number) => {
+  const updateItemQuantity = (itemId: number, change: number) => {
     const updatedItems = orderItems.map(item => {
       if (item.id === itemId) {
         const newQuantity = Math.max(0, item.quantity + change);
@@ -181,7 +280,7 @@ export function TableCard({
     setOrderItems(updatedItems);
   };
 
-  const updateItemNotes = (itemId: string, notes: string) => {
+  const updateItemNotes = (itemId: number, notes: string) => {
     const updatedItems = orderItems.map(item => {
       if (item.id === itemId) {
         return { ...item, notes };
@@ -209,16 +308,16 @@ export function TableCard({
     setCurrentTab("bill");
   };
 
-  const completeOrder = () => {
-    setStatus("available");
-    setOrderItems([]);
-    setCustomerName("");
-    setNumberOfGuests(1);
-    setShowBill(false);
-    setCurrentTab("status");
-    setIsDialogOpen(false);
-    onStatusChange(id, "available");
-  };
+  // const completeOrder = () => {
+  //   setStatus("available");
+  //   setOrderItems([]);
+  //   setCustomerName("");
+  //   setNumberOfGuests(1);
+  //   setShowBill(false);
+  //   setCurrentTab("status");
+  //   setIsDialogOpen(false);
+  //   onStatusChange(id, "available");
+  // };
 
   const getStatusColor = () => {
     switch (status) {
@@ -257,7 +356,7 @@ export function TableCard({
       <div className="space-y-3">
         {items.map(item => {
           return (
-            <div key={item.uniqueId} className="flex justify-between items-start border-b py-3">
+            <div key={item.itemCode} className="flex justify-between items-start border-b py-3">
               <div className="flex gap-3">
                 {item.photoURL && (
                   <div className="h-16 w-16 rounded overflow-hidden flex-shrink-0">
@@ -280,8 +379,8 @@ export function TableCard({
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
-                  <p className="text-sm font-semibold">${item.price.toFixed(2)}</p>
+                  <p className="text-sm text-gray-500 line-clamp-2" dangerouslySetInnerHTML={{ __html: item.description }} />
+                  <p className="text-sm font-semibold">₹{item.price.toFixed(2)}</p>
                 </div>
               </div>
               
@@ -379,6 +478,7 @@ export function TableCard({
                       <Input
                         type="number"
                         min="1"
+                        max="30"
                         placeholder="Number of guests"
                         value={numberOfGuests}
                         onChange={(e) => setNumberOfGuests(parseInt(e.target.value) || 1)}
@@ -395,7 +495,7 @@ export function TableCard({
 
             {/* Order Management Tab */}
             <TabsContent value="order" className="space-y-4">
-              <ScrollArea className="max-h-[400px] p-4">
+              <ScrollArea className="h-[400px] pr-4">
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Menu Section */}
                 <div className="border rounded-lg p-4">
@@ -412,7 +512,7 @@ export function TableCard({
                         onChange={handleSearch}
                       />
                       {searchQuery && (
-                        <button
+                        <Button
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                           onClick={() => {
                             setSearchQuery("");
@@ -420,7 +520,7 @@ export function TableCard({
                           }}
                         >
                           ×
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -445,7 +545,7 @@ export function TableCard({
                   )}
                   
                   {/* Display search results or category-filtered items */}
-                  <ScrollArea className="h-72">
+                  <ScrollArea className="h-72 pr-4">
                     {renderMenuItems()}
                   </ScrollArea>
                 </div>
@@ -459,7 +559,7 @@ export function TableCard({
                     )}
                   </div>
 
-                  <ScrollArea>
+                  <ScrollArea >
                     {orderItems.length === 0 ? (
                       <p className="text-center text-gray-500 my-8">No items added yet</p>
                     ) : (
@@ -477,7 +577,7 @@ export function TableCard({
                                   )}
                                 </div>
                                 <p className="text-sm text-gray-500">
-                                  ${item.price.toFixed(2)} x {item.quantity} = ${(item.price * item.quantity).toFixed(2)}
+                                  ₹{item.price.toFixed(2)} x {item.quantity} = ₹{(item.price * item.quantity).toFixed(2)}
                                 </p>
                                 {item.notes && (
                                   <p className="text-xs italic text-gray-500">Note: {item.notes}</p>
@@ -534,16 +634,16 @@ export function TableCard({
                   <div className="mt-6 space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal:</span>
-                      <span>${calculateSubtotal().toFixed(2)}</span>
+                      <span>₹{calculateSubtotal().toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Tax ({(TAX_RATE * 100).toFixed(0)}%):</span>
-                      <span>${calculateTax().toFixed(2)}</span>
+                      <span>₹{calculateTax().toFixed(2)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-bold">
                       <span>Total:</span>
-                      <span>${calculateTotal().toFixed(2)}</span>
+                      <span>₹{calculateTotal().toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -569,6 +669,7 @@ export function TableCard({
 
             {/* Bill Tab */}
             <TabsContent value="bill" className="space-y-4">
+              <ScrollArea className="h-[400px] p-4">
               <div className="border rounded-lg p-6 max-w-2xl mx-auto">
                 <h2 className="text-center text-2xl font-bold mb-6">Bill Receipt</h2>
                 
@@ -615,7 +716,7 @@ export function TableCard({
                         )}
                       </div>
                       <div className="text-right">{item.quantity}</div>
-                      <div className="text-right">${(item.price * item.quantity).toFixed(2)}</div>
+                      <div className="text-right">₹{(item.price * item.quantity).toFixed(2)}</div>
                     </div>
                   ))}
                 </div>
@@ -625,16 +726,16 @@ export function TableCard({
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>${calculateSubtotal().toFixed(2)}</span>
+                    <span>₹{calculateSubtotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tax ({(TAX_RATE * 100).toFixed(0)}%):</span>
-                    <span>${calculateTax().toFixed(2)}</span>
+                    <span>₹{calculateTax().toFixed(2)}</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span>₹{calculateTotal().toFixed(2)}</span>
                   </div>
                 </div>
                 
@@ -664,7 +765,7 @@ export function TableCard({
                     <div className="p-3 border rounded bg-white">
                       <div className="flex justify-between font-medium">
                         <span>Amount per person:</span>
-                        <span>${(calculateTotal() / splitBill).toFixed(2)}</span>
+                        <span>₹{(calculateTotal() / splitBill).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -684,6 +785,7 @@ export function TableCard({
                   </Button>
                 </div>
               </div>
+              </ScrollArea>
             </TabsContent>
           </Tabs>
         </DialogContent>

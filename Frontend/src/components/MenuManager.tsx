@@ -311,8 +311,8 @@ export const ManageMenu: FC = () => {
         description,
         price: Number(price),
         category,
-        veg,
-        available,
+        isVegetarian: veg,
+        isAvailable: available,
         photoURL: photoData.url,
         photoKey: photoData.key,
         itemCode: itemCode || null
@@ -527,6 +527,7 @@ export const ManageMenu: FC = () => {
                 <DialogHeader>
                   <DialogTitle>Add Menu Item</DialogTitle>
                 </DialogHeader>
+                <ScrollArea className="h-[400px] pr-4">
                 <div className="grid gap-4">
                   <div>
                     <Label className="text-left font-semibold">Item Name*</Label>
@@ -611,6 +612,7 @@ export const ManageMenu: FC = () => {
                     </RadioGroup>
                   </div>
                 </div>
+                </ScrollArea>
                 <div className="flex justify-end gap-2 mt-4">
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>

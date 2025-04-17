@@ -227,7 +227,7 @@ export const EditProfile: FC = () => {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search or Type a Job"
+                  placeholder="Search something..."
                   className="h-10 px-3 mr-50 ring-offset-background file:border-0 file:bg-transparent file:text-sm 
                   file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 
                   focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed py-2 ps-10 pe-16 

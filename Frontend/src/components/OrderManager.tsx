@@ -274,6 +274,7 @@ export const ManageOrders: FC = () => {
                 <SelectItem value="ready">Ready</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
+                {/* {orderType === 'delivery' && (<SelectItem value="cancelled">Cancelled</SelectItem>) } */}
               </SelectContent>
             </Select>
             

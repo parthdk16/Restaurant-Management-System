@@ -4,7 +4,7 @@ import { StatsCard } from "./StatsCard";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { auth, db } from "../Database/FirebaseConfig";
-import { query, collection, where, getDocs } from "firebase/firestore";
+import { query, collection, where, getDocs, Timestamp } from "firebase/firestore";
 import { Pie, PieChart } from "recharts"
 import {
   Card,
@@ -54,6 +54,7 @@ export const Dashboard: FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [areaChartData, setAreaChartData] = useState<ChartData[]>([]);
+  const [totalSale, setTotalSale] = useState<number>();
 
   const navigate = useNavigate();
 
@@ -170,6 +171,42 @@ export const Dashboard: FC = () => {
     });
   }, []);
 
+  async function sumTodaysTransactions() {
+    const today = new Date();
+    // Set the start and end of the day
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  
+    // Create a query to get transactions created today
+    const transactionsQuery = query(
+      collection(db, "Transactions"),
+      where("createdAt", ">=", Timestamp.fromDate(startOfDay)),
+      where("createdAt", "<=", Timestamp.fromDate(endOfDay))
+    );
+  
+    try {
+      const querySnapshot = await getDocs(transactionsQuery);
+      let totalAmount = 0;
+  
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        totalAmount += data.amount || 0; // Ensure to handle cases where amount might be undefined
+      });
+  
+      return totalAmount; // Return the total amount
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      return 0; // Return 0 or handle the error as needed
+    }
+  }
+
+  sumTodaysTransactions().then(total => {
+    console.log("Total amount for today's transactions:", total);
+    setTotalSale(total);
+  }).catch(error => {
+    console.error("Error:", error);
+  });
+
   const chartData = [
     { category: "new", count: counts.applicationsCount, fill: "hsl(var(--chart-1))" },
     { category: "returning", count: counts.shortlistedCandidates, fill: "hsl(var(--chart-2))" },
@@ -203,7 +240,7 @@ export const Dashboard: FC = () => {
           <div className=" grid gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
             <StatsCard title="Total Orders Served" count={counts.totalOrders} icon="ListOrdered" />
             <StatsCard title="Most-cooked Item" count={counts.mostCookedItem} icon="Soup" />
-            <StatsCard title="Sale Today" count={counts.saleToday} icon="IndianRupee"/>
+            <StatsCard title="Sale Today" count={totalSale} icon="IndianRupee"/>
             <StatsCard title="Table Turns Today" count={counts.tableTurnsToday} icon="UsersRound" />
           </div>
           <div className="grid gap-4 md:gap-8 grid-cols-2">

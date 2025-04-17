@@ -301,74 +301,6 @@ export function TableCard({
     );
   };
 
-  // const renderMenuItems = () => {
-  //   const items = getFilteredMenuItems();
-    
-  //   if (isLoading) {
-  //     return <div className="flex justify-center py-8">Loading menu items...</div>;
-  //   }
-    
-  //   if (items.length === 0) {
-  //     return (
-  //       <div className="text-center py-8 text-gray-500">
-  //         {activeView === "search" ? "No items match your search" : "No items in this category"}
-  //       </div>
-  //     );
-  //   }
-
-  //   return (
-  //     <div className="space-y-3">
-  //       {items.map(item => (
-  //         <div key={item.uniqueId} className="flex justify-between items-start border-b py-3">
-  //           <div className="flex gap-3">
-  //             {item.photoURL && (
-  //               <div className="h-16 w-16 rounded overflow-hidden flex-shrink-0">
-  //                 <img 
-  //                   src={item.photoURL} 
-  //                   alt={item.name}
-  //                   className="h-full w-full object-cover"
-  //                   onError={(e) => {
-  //                     // Handle image load errors
-  //                     (e.target as HTMLImageElement).src = "/api/placeholder/64/64";
-  //                   }}
-  //                 />
-  //               </div>
-  //             )}
-  //             <div>
-  //               <div className="flex items-center gap-2">
-  //                 <p className="font-medium">{item.name}</p>
-  //                 {item.isVegetarian && (
-  //                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
-  //                     <Vegan className="h-3 w-3 mr-1" /> Veg
-  //                   </Badge>
-  //                 )}
-  //               </div>
-  //               <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
-  //               <p className="text-sm font-semibold">${item.price.toFixed(2)}</p>
-  //             </div>
-  //           </div>
-            
-  //           <div className="flex items-center gap-2">
-  //             <Input
-  //               placeholder="Special instructions"
-  //               className="w-32 text-xs"
-  //               value={itemNote}
-  //               onChange={(e) => setItemNote(e.target.value)}
-  //             />
-  //             <Button
-  //               size="sm"
-  //               variant="outline"
-  //               onClick={() => addItemToOrder(item)}
-  //             >
-  //               Add
-  //             </Button>
-  //           </div>
-  //         </div>
-  //       ))}
-  //     </div>
-  //   );
-  // };
-
   return (
     <div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}> 
@@ -415,6 +347,7 @@ export function TableCard({
 
             {/* Table Status Tab */}
             <TabsContent value="status" className="space-y-4">
+              <ScrollArea className="max-h-[400px] p-4">
               <div className="grid gap-4">
                 <div>
                   <Label className="text-left font-semibold mb-2 block">Table Status</Label>
@@ -457,10 +390,12 @@ export function TableCard({
                   </>
                 )}
               </div>
+              </ScrollArea>
             </TabsContent>
 
             {/* Order Management Tab */}
             <TabsContent value="order" className="space-y-4">
+              <ScrollArea className="max-h-[400px] p-4">
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Menu Section */}
                 <div className="border rounded-lg p-4">
@@ -524,7 +459,7 @@ export function TableCard({
                     )}
                   </div>
 
-                  <ScrollArea className="h-72">
+                  <ScrollArea>
                     {orderItems.length === 0 ? (
                       <p className="text-center text-gray-500 my-8">No items added yet</p>
                     ) : (
@@ -629,6 +564,7 @@ export function TableCard({
                   </div>
                 </div>
               </div>
+              </ScrollArea>
             </TabsContent>
 
             {/* Bill Tab */}

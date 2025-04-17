@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Loader1 from "./Loader";
 import { auth, db } from "../Database/FirebaseConfig";
 import { Sidebar } from "./Sidebar";
-import { collection, setDoc, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, setDoc, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { TableCard } from "./TableCard";
 import 'react-quill/dist/quill.snow.css';
 import {Header} from "./Header";
@@ -26,7 +26,7 @@ interface Table {
   tableId: string;
   tableNo: number;
   title: string;
-  status: string;
+  status: "available" | "reserved" | "occupied";
   createdBy: string;
   createdAt: Date;
 }
@@ -152,6 +152,16 @@ export const ManageTables: FC = () => {
     });
   };
 
+  async function changeStatus(tableId: string, newStatus: string) {
+    try {
+      const tableRef = doc(db, "Tables", tableId);
+      await updateDoc(tableRef, { status: newStatus });
+      console.log(`Status updated to '${newStatus}' for table ID: ${tableId}`);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  }
+
   useEffect(() => {
     fetchTables();
 
@@ -196,6 +206,7 @@ export const ManageTables: FC = () => {
                     status={table.status}
                     createdAt={new Date(table.createdAt).toLocaleDateString()}
                     onDelete={handleDelete}
+                    onStatusChange={changeStatus(table.tableId, table.status)}
                   />
                 ))}
               </div>

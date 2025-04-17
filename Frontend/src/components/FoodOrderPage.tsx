@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Minus, Plus, ShoppingBag, Utensils, MapPin, X } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Utensils, MapPin, X, CreditCard, QrCode, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,6 +42,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface FoodItem {
   id: string;
@@ -88,6 +89,12 @@ export const FoodOrderingPage: FC = () => {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'veg' | 'non-veg' | 'popular'>('all');
+  const [showUpiOptions, setShowUpiOptions] = useState(false);
+  const [upiId, setUpiId] = useState('');
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [paymentMode, setPaymentMode] = useState('');
+  const [upiIdError, setUpiIdError] = useState('');
+  const [upiPaymentInitiated, setUpiPaymentInitiated] = useState(false);
 
   const { theme } = useTheme();
 
@@ -185,7 +192,7 @@ export const FoodOrderingPage: FC = () => {
   };
 
   const validateOrder = (): boolean => {
-    if (!customerInfo.name || !customerInfo.phone) {
+    if (!customerInfo.name || !customerInfo.phone || !customerInfo.email) {
       Swal.fire({
         ...sweetAlertOptions,
         title: "Missing Information",
@@ -228,6 +235,168 @@ export const FoodOrderingPage: FC = () => {
     return true;
   };
 
+  const validateUpiId = (id: string) => {
+    // Basic UPI ID validation (username@provider format)
+    const upiRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z]{3,}$/;
+    return upiRegex.test(id);
+  };
+  
+  const validateAndProceedUpiPayment = () => {
+    if (!upiId) {
+      setUpiIdError('UPI ID is required');
+      return;
+    }
+    
+    if (!validateUpiId(upiId)) {
+      setUpiIdError('Invalid UPI ID format. Example: username@bankname');
+      return;
+    }
+    
+    setUpiIdError('');
+    setUpiPaymentInitiated(true);
+  };
+  
+  const handlePaymentConfirmation = async () => {
+    try {
+      setIsLoading(true);
+      
+      const orderData = {
+        customerName: customerInfo.name,
+        customerPhone: customerInfo.phone,
+        customerEmail: customerInfo.email || null,
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        status: 'pending',
+        tableNumber: customerInfo.tableNumber || null,
+        totalAmount: total,
+        paymentMethod: 'online',
+        paymentStatus: 'paid', // Set as paid since payment is confirmed
+        specialInstructions: customerInfo.specialInstructions || null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        orderType: customerInfo.orderType,
+        deliveryAddress: customerInfo.deliveryAddress || null,
+        upiId: upiId || null,
+      };
+      
+      const orderRef = await addDoc(collection(db, "Orders"), orderData);
+
+      // Create transaction document
+      const transactionData = {
+        amount: total,
+        createdAt: serverTimestamp(),
+        customerName: customerInfo.name,
+        paymentMethod: 'online',
+        paymentStatus: 'paid',
+        type: 'payment',
+        orderId: orderRef.id,
+      };
+      
+      // Add transaction to Transactions collection
+      await addDoc(collection(db, "Transactions"), transactionData);
+        
+      setOrderPlaced(true);
+      setCart([]);
+      
+      // Close all dialogs
+      setShowUpiOptions(false);
+      setIsCheckoutOpen(false);
+      
+      // Reset UPI states
+      setPaymentMode('');
+      setUpiId('');
+      setUpiIdError('');
+      setUpiPaymentInitiated(false);
+      setShowQrCode(false);
+      
+      Swal.fire({
+        ...sweetAlertOptions,
+        title: "Payment Successful!",
+        text: "Your order has been placed successfully.",
+        icon: "success"
+      });
+      
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      Swal.fire({
+        ...sweetAlertOptions,
+        title: "Error!",
+        text: "Failed to process payment. Please try again.",
+        icon: "error"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };  
+
+  // const placeOrder = async () => {
+  //   if (!validateOrder()) return;
+  //   if (cart.length === 0) {
+  //     Swal.fire({
+  //       ...sweetAlertOptions,
+  //       title: "Empty Cart",
+  //       text: "Please add items to your cart before placing an order.",
+  //       icon: "warning"
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     setIsLoading(true);
+      
+  //     const orderData = {
+  //       customerName: customerInfo.name,
+  //       customerPhone: customerInfo.phone,
+  //       customerEmail: customerInfo.email || null,
+  //       items: cart.map(item => ({
+  //         id: item.id,
+  //         name: item.name,
+  //         price: item.price,
+  //         quantity: item.quantity
+  //       })),
+  //       status: 'pending',
+  //       tableNumber: customerInfo.tableNumber || null,
+  //       totalAmount: total,
+  //       paymentMethod: customerInfo.paymentMethod,
+  //       paymentStatus: 'unpaid',
+  //       specialInstructions: customerInfo.specialInstructions || null,
+  //       createdAt: serverTimestamp(),
+  //       updatedAt: serverTimestamp(),
+  //       orderType: customerInfo.orderType,
+  //       deliveryAddress: customerInfo.deliveryAddress || null,
+  //     };
+      
+  //     await addDoc(collection(db, "Orders"), orderData);
+      
+  //     setOrderPlaced(true);
+  //     setCart([]);
+      
+  //     Swal.fire({
+  //       ...sweetAlertOptions,
+  //       title: "Order Placed Successfully!",
+  //       text: "Your order has been received and is being processed.",
+  //       icon: "success"
+  //     });
+      
+  //     setIsCheckoutOpen(false);
+      
+  //   } catch (error) {
+  //     console.error("Error placing order:", error);
+  //     Swal.fire({
+  //       ...sweetAlertOptions,
+  //       title: "Error!",
+  //       text: "Failed to place your order. Please try again.",
+  //       icon: "error"
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const placeOrder = async () => {
     if (!validateOrder()) return;
     if (cart.length === 0) {
@@ -239,7 +408,7 @@ export const FoodOrderingPage: FC = () => {
       });
       return;
     }
-
+  
     try {
       setIsLoading(true);
       
@@ -257,7 +426,7 @@ export const FoodOrderingPage: FC = () => {
         tableNumber: customerInfo.tableNumber || null,
         totalAmount: total,
         paymentMethod: customerInfo.paymentMethod,
-        paymentStatus: 'unpaid', // Assume unpaid initially
+        paymentStatus: 'unpaid', // For cash/card payments
         specialInstructions: customerInfo.specialInstructions || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -528,12 +697,13 @@ export const FoodOrderingPage: FC = () => {
       </Dialog>
 
       {/* Checkout Dialog */}
-      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+      {/* <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Complete Your Order</DialogTitle>
           </DialogHeader>
           
+          <ScrollArea className="max-h-[400px] mb-4 pr-4">
           <div className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -559,7 +729,7 @@ export const FoodOrderingPage: FC = () => {
                 />
               </div>
               <div className="md:col-span-2">
-                <Label htmlFor="email">Email (Optional)</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input 
                   id="email" 
                   name="email" 
@@ -644,7 +814,7 @@ export const FoodOrderingPage: FC = () => {
                 <SelectContent>
                   <SelectItem value="cash">Cash</SelectItem>
                   <SelectItem value="card">Card on Delivery</SelectItem>
-                  <SelectItem value="online">Online Payment</SelectItem>
+                  <SelectItem value="online">UPI</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -699,6 +869,7 @@ export const FoodOrderingPage: FC = () => {
               </AccordionItem>
             </Accordion>
           </div>
+          </ScrollArea>
           
           <DialogFooter className="flex flex-col sm:flex-row gap-2">
             <Button 
@@ -724,6 +895,329 @@ export const FoodOrderingPage: FC = () => {
               ) : (
                 'Place Order'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog> */}
+
+      {/* Checkout Dialog */}
+      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Complete Your Order</DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[400px] mb-4 pr-4">
+          <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input 
+                  id="name" 
+                  name="name" 
+                  value={customerInfo.name} 
+                  onChange={handleInputChange} 
+                  placeholder="Your Name" 
+                  required 
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone</Label>
+                <Input 
+                  id="phone" 
+                  name="phone" 
+                  value={customerInfo.phone} 
+                  onChange={handleInputChange} 
+                  placeholder="10-digit phone number" 
+                  required 
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  value={customerInfo.email} 
+                  onChange={handleInputChange} 
+                  placeholder="your@email.com" 
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="orderType">Order Type</Label>
+              <Select 
+                value={customerInfo.orderType} 
+                onValueChange={(value) => handleSelectChange('orderType', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select order type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dine-in">
+                    <div className="flex items-center gap-2">
+                      <Utensils className="size-4" />
+                      Dine-in
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="takeaway">
+                    <div className="flex items-center gap-2">
+                      <ShoppingBag className="size-4" />
+                      Takeaway
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="delivery">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="size-4" />
+                      Delivery
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {customerInfo.orderType === 'dine-in' && (
+              <div>
+                <Label htmlFor="tableNumber">Table Number</Label>
+                <Input 
+                  id="tableNumber" 
+                  name="tableNumber" 
+                  value={customerInfo.tableNumber || ''} 
+                  onChange={handleInputChange} 
+                  placeholder="Enter your table number" 
+                  required 
+                />
+              </div>
+            )}
+            
+            {customerInfo.orderType === 'delivery' && (
+              <div>
+                <Label htmlFor="deliveryAddress">Delivery Address</Label>
+                <Textarea 
+                  id="deliveryAddress" 
+                  name="deliveryAddress" 
+                  value={customerInfo.deliveryAddress || ''} 
+                  onChange={handleInputChange} 
+                  placeholder="Enter your full delivery address" 
+                  rows={3} 
+                  required 
+                />
+              </div>
+            )}
+            
+            <div>
+              <Label htmlFor="paymentMethod">Payment Method</Label>
+              <Select 
+                value={customerInfo.paymentMethod} 
+                onValueChange={(value) => handleSelectChange('paymentMethod', value as any)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="card">Card on Delivery</SelectItem>
+                  <SelectItem value="online">UPI</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="specialInstructions">Special Instructions (Optional)</Label>
+              <Textarea 
+                id="specialInstructions" 
+                name="specialInstructions" 
+                value={customerInfo.specialInstructions || ''} 
+                onChange={handleInputChange} 
+                placeholder="Any allergies, preferences, or special requests?" 
+                rows={3} 
+              />
+            </div>
+            
+            <Accordion type="single" collapsible>
+              <AccordionItem value="order-summary">
+                <AccordionTrigger>
+                  Order Summary (₹{total.toFixed(2)})
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3">
+                    {cart.map(item => (
+                      <div key={item.id} className="flex justify-between text-sm">
+                        <span>
+                          {item.name} x {item.quantity}
+                        </span>
+                        <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal</span>
+                        <span>₹{subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Tax (5%)</span>
+                        <span>₹{tax.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Delivery Fee</span>
+                        <span>₹{deliveryFee.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold pt-1 border-t">
+                        <span>Total</span>
+                        <span>₹{total.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+          </ScrollArea>
+          
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto"
+              onClick={() => {
+                setIsCheckoutOpen(false);
+                setIsCartOpen(true);
+              }}
+            >
+              Back to Cart
+            </Button>
+            
+            {customerInfo.paymentMethod === 'online' ? (
+              <Button 
+                className="w-full sm:w-auto" 
+                onClick={() => setShowUpiOptions(true)}
+              >
+                Proceed to Pay
+              </Button>
+            ) : (
+              <Button 
+                className="w-full sm:w-auto" 
+                onClick={placeOrder}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent"></div>
+                    Processing...
+                  </span>
+                ) : (
+                  'Place Order'
+                )}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* UPI Payment Options Dialog */}
+      <Dialog open={showUpiOptions} onOpenChange={setShowUpiOptions}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>UPI Payment</DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <p className="text-center font-medium">Select Payment Method</p>
+            
+            <div className="flex justify-center gap-4">
+              <Button 
+                variant="outline" 
+                className="flex flex-col items-center p-4 h-auto"
+                onClick={() => {
+                  setPaymentMode('qr');
+                  setShowQrCode(true);
+                }}
+              >
+                <QrCode className="size-8 mb-2" />
+                <span>Scan QR Code</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="flex flex-col items-center p-4 h-auto"
+                onClick={() => setPaymentMode('upi-id')}
+              >
+                <CreditCard className="size-8 mb-2" />
+                <span>Enter UPI ID</span>
+              </Button>
+            </div>
+            
+            {paymentMode === 'qr' && showQrCode && (
+              <div className="flex flex-col items-center p-4 border rounded-lg">
+                <div className="bg-white p-4 rounded-lg mb-3">
+                  <img src="/api/placeholder/250/250" alt="QR Code for payment" className="w-full" />
+                </div>
+                <p className="text-sm text-center mb-4">Scan this QR code to pay ₹{total.toFixed(2)}</p>
+                <Button 
+                  onClick={() => handlePaymentConfirmation()}
+                  className="w-full"
+                >
+                  I've Paid
+                </Button>
+              </div>
+            )}
+            
+            {paymentMode === 'upi-id' && (
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label htmlFor="upiId">Enter your UPI ID</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      id="upiId" 
+                      value={upiId} 
+                      onChange={(e) => setUpiId(e.target.value)}
+                      placeholder="yourname@bankname" 
+                    />
+                  </div>
+                  {upiIdError && (
+                    <p className="text-destructive text-sm mt-1">{upiIdError}</p>
+                  )}
+                </div>
+                
+                <Button 
+                  onClick={validateAndProceedUpiPayment}
+                  disabled={!upiId || upiIdError !== ''}
+                >
+                  Pay ₹{total.toFixed(2)}
+                </Button>
+              </div>
+            )}
+            
+            {paymentMode === 'upi-id' && upiPaymentInitiated && (
+              <div className="flex flex-col items-center p-4 border rounded-lg mt-2">
+                <div className="flex items-center gap-2 text-green-600 mb-2">
+                  <CheckCircle className="size-5" />
+                  <span>Payment initiated</span>
+                </div>
+                <p className="text-sm text-center mb-4">Check your UPI app to approve the payment</p>
+                <Button 
+                  onClick={() => handlePaymentConfirmation()}
+                  className="w-full"
+                >
+                  I've Paid
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowUpiOptions(false);
+                setPaymentMode('');
+                setUpiId('');
+                setUpiIdError(false);
+                setUpiPaymentInitiated(false);
+                setShowQrCode(false);
+              }}
+            >
+              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -17,6 +17,7 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "./ui/scroll-area";
 
 const s3Client = new S3Client({
   region: 'us-east-1',
@@ -730,6 +731,7 @@ export const ManageMenu: FC = () => {
           <DialogHeader>
             <DialogTitle>Edit Menu Item</DialogTitle>
           </DialogHeader>
+          <ScrollArea className="h-[400px] pr-4">
           <div className="grid gap-4">
             <div>
               <Label className="text-left font-semibold">Item Name*</Label>
@@ -834,6 +836,7 @@ export const ManageMenu: FC = () => {
               </RadioGroup>
             </div>
           </div>
+          </ScrollArea>
           <div className="flex justify-end gap-2 mt-4">
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>

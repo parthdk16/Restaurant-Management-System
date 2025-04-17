@@ -34,7 +34,6 @@ interface User {
 interface Counts {
   totalOrders: number;
   mostCookedItem: number;
-  saleToday: number;
   tableTurnsToday: number;
 }
 
@@ -49,12 +48,11 @@ export const Dashboard: FC = () => {
   const [counts, setCounts] = useState<Counts>({
     totalOrders: 0,
     mostCookedItem: 0,
-    saleToday: 0,
     tableTurnsToday: 0,
   });
+  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [areaChartData, setAreaChartData] = useState<ChartData[]>([]);
-  const [totalSale, setTotalSale] = useState<number>();
 
   const navigate = useNavigate();
 
@@ -83,13 +81,11 @@ export const Dashboard: FC = () => {
 
       const orderSnapshot = await getDocs(collection(db, "Orders"));
       const cookedItemSnapshot = await getDocs(collection(db, "Orders"));
-      const saleSnapshot = await getDocs(collection(db, "Sales"));
       const tableTurnSnapshot = await getDocs(collection(db, "TableTurns"));
 
       setCounts({
         totalOrders: orderSnapshot.size,
         mostCookedItem: cookedItemSnapshot.size,
-        saleToday: saleSnapshot.size,
         tableTurnsToday: tableTurnSnapshot.size,
       });
 
@@ -118,7 +114,7 @@ export const Dashboard: FC = () => {
     sixMonthsAgo.setMonth(currentDate.getMonth() - 5);
     sixMonthsAgo.setDate(1);
     sixMonthsAgo.setHours(0, 0, 0, 0);
-    console.log('Querying database with: ', sixMonthsAgo.toISOString());
+    // console.log('Querying database with: ', sixMonthsAgo.toISOString());
   
     const postsQuery = query(
       collection(db, "Posts"),
@@ -126,7 +122,7 @@ export const Dashboard: FC = () => {
     );
   
     const snapshot = await getDocs(postsQuery);
-    console.log(snapshot.size, " posts found in the last 6 months");
+    // console.log(snapshot.size, " posts found in the last 6 months");
   
     snapshot.forEach((doc) => {
       const post = doc.data();
@@ -164,52 +160,48 @@ export const Dashboard: FC = () => {
           totalPosts: posts,
           totalJobOpenings: counts.publishedPostCounts[idx],
         }));
-        console.log("Post counts for the last 6 months:", counts);
-        console.log("Area chart data:", areaChartData);
+        // console.log("Post counts for the last 6 months:", counts);
+        // console.log("Area chart data:", areaChartData);
         setAreaChartData(areaChartData);
       }
     });
   }, []);
 
-  async function sumTodaysTransactions() {
-    const today = new Date();
-    // Set the start and end of the day
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-  
-    // Create a query to get transactions created today
-    const transactionsQuery = query(
-      collection(db, "Transactions"),
-      where("createdAt", ">=", Timestamp.fromDate(startOfDay)),
-      where("createdAt", "<=", Timestamp.fromDate(endOfDay))
-    );
-  
-    try {
-      const querySnapshot = await getDocs(transactionsQuery);
-      let totalAmount = 0;
-  
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        totalAmount += data.amount || 0; // Ensure to handle cases where amount might be undefined
-      });
-  
-      return totalAmount; // Return the total amount
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-      return 0; // Return 0 or handle the error as needed
-    }
-  }
+  useEffect(() => {
+    const sumTodaysTransactions = async () => {
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-  sumTodaysTransactions().then(total => {
-    console.log("Total amount for today's transactions:", total);
-    setTotalSale(total);
-  }).catch(error => {
-    console.error("Error:", error);
-  });
+      const transactionsQuery = query(
+        collection(db, "Transactions"),
+        where("createdAt", ">=", Timestamp.fromDate(startOfDay)),
+        where("createdAt", "<=", Timestamp.fromDate(endOfDay))
+      );
+
+      try {
+        const querySnapshot = await getDocs(transactionsQuery);
+        let total = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          total += data.amount || 0; // Ensure to handle cases where amount might be undefined
+        });
+
+        setTotalAmount(total); // Set the total amount in state
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
+    };
+
+    sumTodaysTransactions();
+  }, []);
 
   const chartData = [
-    { category: "new", count: counts.applicationsCount, fill: "hsl(var(--chart-1))" },
-    { category: "returning", count: counts.shortlistedCandidates, fill: "hsl(var(--chart-2))" },
+    { category: "new", count: counts.mostCookedItem, fill: "hsl(var(--chart-1))" },
+    { category: "returning", count: counts.totalOrders, fill: "hsl(var(--chart-2))" },
   ]
 
   const chartConfig = {
@@ -240,7 +232,7 @@ export const Dashboard: FC = () => {
           <div className=" grid gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
             <StatsCard title="Total Orders Served" count={counts.totalOrders} icon="ListOrdered" />
             <StatsCard title="Most-cooked Item" count={counts.mostCookedItem} icon="Soup" />
-            <StatsCard title="Sale Today" count={totalSale} icon="IndianRupee"/>
+            <StatsCard title="Sale Today" count={totalAmount} icon="IndianRupee"/>
             <StatsCard title="Table Turns Today" count={counts.tableTurnsToday} icon="UsersRound" />
           </div>
           <div className="grid gap-4 md:gap-8 grid-cols-2">
@@ -274,7 +266,7 @@ export const Dashboard: FC = () => {
             </CardContent>
             <CardFooter className="flex-col gap-2 text-sm">
               <div className="leading-none text-muted-foreground">
-                Total customers ({counts.totalCandidates})
+                Total customers ({counts.totalOrders + counts.mostCookedItem})
               </div>
             </CardFooter>
           </Card>

@@ -19,15 +19,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "./ui/scroll-area";
 
+if (!process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+  throw new Error("AWS configuration environment variables are missing.");
+}
+
 const s3Client = new S3Client({
-  region: 'us-east-1',
+  region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId: 'AKIAXZ5NGL33FNF5YITQ',
-    secretAccessKey: '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'
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }
 });
 
-const S3_BUCKET = 'hotel-shripad';
+const S3_BUCKET = process.env.AWS_BUCKET_NAME;
 
 interface MenuItem {
   id: string;

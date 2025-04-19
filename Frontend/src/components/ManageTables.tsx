@@ -48,6 +48,10 @@ export const ManageTables: FC = () => {
   };
 
   useEffect(() => {
+      document.title = 'Manage Tables - Hotel Shripad';
+    }, []);
+
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setUser({

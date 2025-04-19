@@ -96,6 +96,10 @@ export const ManageMenu: FC = () => {
   };
 
   useEffect(() => {
+    document.title = 'Manage Menu';
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -667,7 +671,7 @@ export const ManageMenu: FC = () => {
             ) : (
               <div className="justify-center grid gap-x-8 gap-y-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {filteredItems.map((item) => (
-                  <div key={item.id} className="border rounded-lg p-4 shadow-md hover:border-gray-400 transition-all relative">
+                  <div key={item.id} className="border rounded-lg p-4 shadow-md hover:border-gray-400 transition-all relative bg-white">
                     {/* Item code badge */}
                     {item.itemCode && (
                       <div className="absolute top-2 right-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded-md text-sm font-medium">

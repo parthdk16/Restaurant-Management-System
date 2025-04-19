@@ -63,6 +63,10 @@ export const EditProfile: FC = () => {
   const [gender, setGender] = useState<string | null>("");
   const [isGoogleUser, setIsGoogleUser] = useState<boolean>(false);
   const navigate = useNavigate();
+  
+  useEffect(() => {
+      document.title = 'Profile - Hotel Shripad';
+  }, []);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -114,7 +118,7 @@ export const EditProfile: FC = () => {
       // Check if a document was found
       if (querySnapshot.empty) {
         console.error("No user found with the given email.");
-        alert("No user found with the provided email.");
+        // alert("No user found with the provided email.");
         return;
       }
   
@@ -296,7 +300,7 @@ export const EditProfile: FC = () => {
                         <CircleUser className="h-5 w-5" />
                       )}
               </div>
-                <Trash2 className="text-red-500 cursor-pointer"/>
+                <Trash2 className="ml-2 text-red-500 cursor-pointer"/>
               </div>
 
               <div className=" pt-4 flex flex-wrap gap-4">
@@ -336,7 +340,7 @@ export const EditProfile: FC = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground pb-3 flex flex-row">This is your public display name. {isGoogleUser && <p> (Non-editable due to Google Sign-in)</p>}</p>
+              <p className="text-sm text-muted-foreground pb-3 flex flex-row">This is your public display name.{isGoogleUser && <p> (Non-editable due to Google Sign-in)</p>}</p>
 
               <div className="mt-4">
                 <Label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">

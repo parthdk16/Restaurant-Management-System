@@ -89,6 +89,10 @@ export const ManageOrders: FC = () => {
   }), [theme]);
 
   useEffect(() => {
+      document.title = 'Manage Orders - Hotel Shripad';
+    }, []);
+
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setUser(currentUser);

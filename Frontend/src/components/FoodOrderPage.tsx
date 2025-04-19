@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { db } from "../Database/FirebaseConfig";
-import { collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, addDoc, serverTimestamp, query, where } from "firebase/firestore";
 import Swal from 'sweetalert2';
 import { useTheme } from './theme-provider';
 import {
@@ -43,7 +43,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ScrollArea } from "./ui/scroll-area";
-import QRImg from '@/assets/QR.png'
+import QRImg from '@/assets/QR.png';
+import logo from '@/assets/logoLandscape.png';
 
 interface FoodItem {
   id: string;
@@ -122,7 +123,8 @@ export const FoodOrderingPage: FC = () => {
     try {
       setIsLoading(true);
       const itemsCollection = collection(db, "Menu");
-      const itemsSnapshot = await getDocs(itemsCollection);
+      const availableItemsQuery = query(itemsCollection, where("isAvailable", "==", true));
+      const itemsSnapshot = await getDocs(availableItemsQuery);
       
       const items: FoodItem[] = [];
       const cats = new Set<string>();
@@ -486,14 +488,17 @@ export const FoodOrderingPage: FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center mb-2">Food Ordering</h1>
-        <p className="text-center text-gray-500 mb-6">Order delicious food for delivery, takeaway, or dine-in</p>
+      <div className="relative flex items-center mb-4">
+        <img src={logo} alt="logo" className="absolute left-0 w-32 h-auto" />
+        <h1 className="mx-auto text-5xl font-bold text-center">Hotel Shripad</h1>
+      </div>
+        <p className="text-center text-black text-lg mb-6">Order delicious food for delivery, takeaway, or dine-in</p>
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="relative w-full md:w-96">
-            <input
+            <Input
               type="text"
               placeholder="Search menu..."
               className="w-full p-2 pl-10 border rounded-lg"
@@ -542,7 +547,6 @@ export const FoodOrderingPage: FC = () => {
               Popular
             </Button>
           </div>
-          
           <Button 
             onClick={() => setIsCartOpen(true)}
             className="flex items-center gap-2"
@@ -554,8 +558,9 @@ export const FoodOrderingPage: FC = () => {
       </header>
 
       <main>
-        <Tabs defaultValue={categories[0] || "all"}>
+        {/* <Tabs defaultValue={categories[0] || "all"}>
           <TabsList className="mb-6 overflow-x-auto flex w-full">
+            <TabsTrigger key='all' value='all' className="whitespace-nowrap">All</TabsTrigger>
             {categories.map(category => (
               <TabsTrigger key={category} value={category} className="whitespace-nowrap">
                 {category}
@@ -565,7 +570,63 @@ export const FoodOrderingPage: FC = () => {
           
           {categories.map(category => (
             <TabsContent key={category} value={category}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredItems
+                  .filter(item => item.category === category)
+                  .map(item => (
+                    <FoodItemCard 
+                      key={item.id} 
+                      item={item} 
+                      onAddToCart={addToCart} 
+                      cartItem={cart.find(cartItem => cartItem.id === item.id)}
+                      onUpdateQuantity={updateQuantity}
+                    />
+                  ))}
+              </div>
+              
+              {filteredItems.filter(item => item.category === category).length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No items found in this category with the current filters.</p>
+                </div>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs> */}
+        <Tabs defaultValue="all">
+          <TabsList className="mb-6 overflow-x-auto flex w-full bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50">
+            <TabsTrigger key='all' value='all' className="whitespace-nowrap">All</TabsTrigger>
+            {categories.map(category => (
+              <TabsTrigger key={category} value={category} className="whitespace-nowrap">
+                {category}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          
+          {/* All category tab content */}
+          <TabsContent key="all" value="all">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredItems.map(item => (
+                <FoodItemCard 
+                  key={item.id} 
+                  item={item} 
+                  onAddToCart={addToCart} 
+                  cartItem={cart.find(cartItem => cartItem.id === item.id)}
+                  onUpdateQuantity={updateQuantity}
+                />
+              ))}
+            </div>
+            
+            {filteredItems.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No items found with the current filters.</p>
+              </div>
+            )}
+          </TabsContent>
+          
+          {/* Individual category tab contents */}
+          {categories.map(category => (
+            <TabsContent key={category} value={category}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredItems
                   .filter(item => item.category === category)
                   .map(item => (
@@ -1213,7 +1274,7 @@ export const FoodOrderingPage: FC = () => {
                 setShowUpiOptions(false);
                 setPaymentMode('');
                 setUpiId('');
-                setUpiIdError(false);
+                setUpiIdError('');
                 setUpiPaymentInitiated(false);
                 setShowQrCode(false);
               }}
@@ -1235,7 +1296,7 @@ const FoodItemCard: FC<{
   onUpdateQuantity: (itemId: string, quantity: number) => void;
 }> = ({ item, onAddToCart, cartItem, onUpdateQuantity }) => {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden max-w-s hover:shadow-lg transition-shadow hover:scale-[95%] transition hover:cursor-pointer duration-200">
       <div className="aspect-[16/9] bg-gray-100 flex items-center justify-center">
         {item.image ? (
           <img 
@@ -1262,15 +1323,16 @@ const FoodItemCard: FC<{
       
       <CardContent className="pb-2">
         <p className="text-sm text-gray-500 line-clamp-2" dangerouslySetInnerHTML={{ __html: item.description }} />
-        <p className="text-lg font-semibold mt-2">₹{item.price.toFixed(2)}</p>
       </CardContent>
       
-      <CardFooter>
+      <CardFooter className="flex justify-between align-center items-center">
+        <p className="text-lg font-semibold">₹{item.price.toFixed(2)}</p>
         {cartItem ? (
-          <div className="flex items-center gap-2 w-full">
+          <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
-              size="icon" 
+              size="sm"
+              className="text-teal-600 border-teal-600 hover:bg-teal-50"
               onClick={() => onUpdateQuantity(item.id, cartItem.quantity - 1)}
             >
               <Minus className="size-4" />
@@ -1279,6 +1341,7 @@ const FoodItemCard: FC<{
             <Button 
               variant="outline" 
               size="icon" 
+              className="text-teal-600 border-teal-600 hover:bg-teal-50"
               onClick={() => onUpdateQuantity(item.id, cartItem.quantity + 1)}
             >
               <Plus className="size-4" />
@@ -1286,7 +1349,8 @@ const FoodItemCard: FC<{
           </div>
         ) : (
           <Button 
-            className="w-full"
+            className="w-1/2 text-teal-600 border-teal-600 hover:bg-teal-50"
+            variant='outline'
             onClick={() => onAddToCart(item)}
           >
             Add to Cart

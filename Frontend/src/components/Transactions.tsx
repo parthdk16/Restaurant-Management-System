@@ -82,6 +82,10 @@ export const TransactionHistory: FC = () => {
 
   const { theme } = useTheme();
 
+  useEffect(() => {
+      document.title = 'Transactions - Hotel Shripad';
+    }, []);
+
   const sweetAlertOptions = useMemo(() => ({
     background: theme === "dark" ? 'rgba(0, 0, 0, 0.9)' : '#fff',
     color: theme === "dark" ? '#fff' : '#000',

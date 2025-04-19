@@ -4,15 +4,14 @@ import {
   Bell,
   CircleUser,
   Home,
-  Package2,
   FileInput,
-  UserCheck,
-  UserRoundX,
-  Users,
-  UserRoundCheck,
-  History,
+  Soup,
+  ListOrdered,
+  BadgeIndianRupee,
+  LockKeyhole,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from '@/assets/logoLandscape.png'; 
 
 interface SidebarProps {
     activePage: string;
@@ -28,8 +27,9 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-            <Package2 className="h-6 w-6" />
-            <span className="">Hotel Shripad</span>
+            {/* <Package2 className="h-6 w-6" />
+            <span className="">Hotel Shripad</span> */}
+            <img src={logo} alt="Logo" className="h-12 w-auto" />
           </Link>
           <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
             <Bell className="h-4 w-4" />
@@ -56,37 +56,44 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
           to="/manage-menu"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "manage-menu" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
-          <Users className="h-4 w-4" />
+          <Soup className="h-4 w-4" />
           Menu Manager
         </Link>
         <Link
           to="/orders"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "order-manager" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
-          <UserRoundCheck className="h-4 w-4" />
+          <ListOrdered className="h-4 w-4" />
           Order Manager
         </Link>
         <Link
           to="/history"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "transaction-history" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
-          <UserRoundX className="h-4 w-4" />
+          <BadgeIndianRupee className="h-4 w-4" />
           Transactions
         </Link>
         <Link
+          to="/security"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "security" ? "bg-muted text-primary" : "text-muted-foreground"}`}
+        >
+          <LockKeyhole className="h-4 w-4" />
+          Security
+        </Link>
+        {/* <Link
           to="/rounds"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "rounds" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
           <History className="h-4 w-4" />
           Inventory
-        </Link>
-        <Link
+        </Link> */}
+        {/* <Link
           to="/onboard"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "onboard" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
           <UserCheck className="h-4 w-4" />
           Analytics
-        </Link>
+        </Link> */}
       </nav>
         </div>
         <div className="mt-auto pl-0 p-2">

@@ -14,6 +14,9 @@ import { ManageOrders } from './components/OrderManager';
 import { FoodOrderingPage } from './components/FoodOrderPage';
 import { TableOrderPage } from './components/TableOrder';
 import { TransactionHistory } from './components/Transactions';
+import { SecuritySettings } from './components/SecuritySettings';
+import { RestaurantLandingPage } from './components/CustomerLanding';
+import { InventoryItemList } from './components/InventoryItemList';
 
 const App: React.FC = () => {
   return (
@@ -33,6 +36,9 @@ const App: React.FC = () => {
           <Route path="/history" element={ <TransactionHistory/>} />
           <Route path="/dinein-orders" element={ <TableOrderPage/>} />
           <Route path="/page-not-found" element={ <NotFound/>} />
+          <Route path="/restaurant" element={ <RestaurantLandingPage/>} />
+          <Route path="/security" element={ <SecuritySettings/>} />
+          <Route path="/manage-inventory" element={ <InventoryItemList/>} />
           <Route path="*" element={<SignIn />} />
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute> } />
         </Routes>

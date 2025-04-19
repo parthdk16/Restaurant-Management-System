@@ -57,6 +57,10 @@ export const Dashboard: FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+      document.title = 'Dashboard - Hotel Shripad';
+    }, []);
+
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         const userDetails: User = {

@@ -886,13 +886,12 @@ export const ManageMenu: FC = () => {
 // const s3Client = new S3Client({
 //   region: 'us-east-1',
 //   credentials: {
-//     accessKeyId: 'AKIAXZ5NGL33FNF5YITQ',
-//     secretAccessKey: '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'
+//     accessKeyId: 'TRIAL',
+//     secretAccessKey: 'TRIAL'
 //   }
 // });
 
-// const S3_BUCKET = 'hotel-shripad';
-
+// const S3_BUCKET = 'TRIAL
 // interface MenuItem {
 //   id: string;
 //   name: string;

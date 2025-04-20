@@ -292,7 +292,7 @@ export const TransactionHistory: FC = () => {
         <Header />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <h1 className="text-2xl text-primary font-bold">Transaction History</h1>
+            <h1 className="text-2xl text-primary font-bold">Transactions</h1>
             <div className="flex gap-2">
               <Button variant="outline" onClick={fetchTransactions}>
                 Refresh

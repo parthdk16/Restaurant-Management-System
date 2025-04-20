@@ -17,19 +17,21 @@ import { TransactionHistory } from './components/Transactions';
 import { SecuritySettings } from './components/SecuritySettings';
 import { RestaurantLandingPage } from './components/CustomerLanding';
 import { InventoryItemList } from './components/InventoryItemList';
+import { CustomerLogin } from './components/CustomerLogin';
 
 const App: React.FC = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
     <Router>
         <Routes>
-          <Route path="/" element={<SignIn/>} />
+          <Route path="/" element={<CustomerLogin/>} />
           <Route path="/signup" element={<SignUpForm/>} />
           <Route path="/tables" element={<ManageTables/>} />
           <Route path="/manage-menu" element={<ManageMenu/>} />
           {/* <Route path="/manage-orders" element={<EditOrder/>} /> */}
           <Route path="/profile" element={<EditProfile/>} />
           <Route path="/admin/login" element={  <SignIn/> } />
+          <Route path="/login" element={  <CustomerLogin/> } />
           <Route path="/signup" element={ <SignUpForm/>} />
           <Route path="/orders" element={ <ManageOrders/>} />
           <Route path="/food-order" element={ <FoodOrderingPage/>} />
@@ -39,7 +41,7 @@ const App: React.FC = () => {
           <Route path="/restaurant" element={ <RestaurantLandingPage/>} />
           <Route path="/security" element={ <SecuritySettings/>} />
           <Route path="/manage-inventory" element={ <InventoryItemList/>} />
-          <Route path="*" element={<SignIn />} />
+          <Route path="*" element={<NotFound />} />
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute> } />
         </Routes>
     </Router>

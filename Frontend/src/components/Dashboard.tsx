@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/chart"
 import { AreaChartComponent } from "./AreaChart";
 import Loader1 from "./Loader";
+
 interface User {
   uid: string;
   email: string | null;
@@ -287,7 +288,7 @@ export const Dashboard: FC = () => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl text-primary font-bold">
-              Welcome back, {user?.displayName || "User"}
+              Welcome, {user?.displayName?.split(' ')[0] || "User"}!
             </h1>
           </div>
           <div className=" grid gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-8 lg:grid-cols-4">

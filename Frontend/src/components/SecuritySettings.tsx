@@ -13,12 +13,23 @@ import {
 import { auth } from '../Database/FirebaseConfig';
 import { X, Shield, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import Loader1 from "./Loader";
+import { Sidebar } from "./Sidebar";
+import { Header } from "./Header";
+import { useNavigate } from "react-router-dom";
 
 interface AdminSecuritySettings {
   adminEmails: string[];
   secretCode: string;
   lastUpdated: Date;
   updatedBy: string;
+}
+
+interface User {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
 }
 
 export const SecuritySettings: FC = () => {
@@ -31,6 +42,27 @@ export const SecuritySettings: FC = () => {
   const [success, setSuccess] = useState('');
   const [isSecretVisible, setIsSecretVisible] = useState(false);
   const [confirmUpdate, setConfirmUpdate] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+        if (currentUser) {
+          const userDetails: User = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+            photoURL: currentUser.photoURL,
+          };
+          setUser(userDetails);
+        } else {
+          setUser(null);
+          navigate("/login");
+        }
+      });
+  
+      return () => unsubscribe();
+    }, [navigate]);
   
   useEffect(() => {
     loadSettings();
@@ -167,10 +199,15 @@ export const SecuritySettings: FC = () => {
   }
 
   return (
-    <div className=" p-12 m-12 container mx-auto py-10">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
+          <Sidebar user={user} activePage="security" />
+          <div className="flex flex-col h-screen">
+            <Header />
+            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
+    <div className=" container mx-auto">
       <div className="flex items-center mb-8">
         <Shield className="h-6 w-6 mr-2" />
-        <h1 className="text-3xl font-bold">Admin Security Settings</h1>
+        <h1 className="text-2xl font-bold">Admin Security Settings</h1>
       </div>
       
       {error && (
@@ -355,6 +392,10 @@ export const SecuritySettings: FC = () => {
             </p>
           </CardFooter>
         </Card>
+      </div>
+    </div>
+    </main>
+        {loading && <Loader1/>} 
       </div>
     </div>
   );

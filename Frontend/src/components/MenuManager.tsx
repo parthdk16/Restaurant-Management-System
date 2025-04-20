@@ -77,9 +77,9 @@ export const ManageMenu: FC = () => {
   const [itemCode, setItemCode] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    category: "",
-    availabilityFilter: "",
-    vegFilter: "",
+    category: "all",
+    availabilityFilter: "all",
+    vegFilter: "all",
     searchQuery: ""
   });
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ export const ManageMenu: FC = () => {
   };
 
   useEffect(() => {
-    document.title = 'Manage Menu';
+    document.title = 'Manage Menu - Hotel Shripad';
   }, []);
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export const ManageMenu: FC = () => {
       
       setMenuItems(menuList);
       setFilteredItems(menuList);
-      console.log('MenuList: ',menuList);
+      // console.log('MenuList: ',menuList);
     } catch (error) {
       console.error("Error fetching menu items: ", error);
     } finally {
@@ -150,19 +150,36 @@ export const ManageMenu: FC = () => {
       );
     }
     
+    // // Filter by category
+    // if (filterOptions.category) {
+    //   result = result.filter(item => item.category === filterOptions.category);
+    // }
+    
+    // // Filter by availability
+    // if (filterOptions.availabilityFilter) {
+    //   const isAvailable = filterOptions.availabilityFilter === "available";
+    //   result = result.filter(item => item.isAvailable === isAvailable);
+    // }
+    
+    // // Filter by veg/non-veg
+    // if (filterOptions.vegFilter) {
+    //   const isVeg = filterOptions.vegFilter === "veg";
+    //   result = result.filter(item => item.isVegetarian === isVeg);
+    // }
+
     // Filter by category
-    if (filterOptions.category) {
+    if (filterOptions.category && filterOptions.category !== "all") {
       result = result.filter(item => item.category === filterOptions.category);
     }
-    
+
     // Filter by availability
-    if (filterOptions.availabilityFilter) {
+    if (filterOptions.availabilityFilter && filterOptions.availabilityFilter !== "all") {
       const isAvailable = filterOptions.availabilityFilter === "available";
       result = result.filter(item => item.isAvailable === isAvailable);
     }
-    
+
     // Filter by veg/non-veg
-    if (filterOptions.vegFilter) {
+    if (filterOptions.vegFilter && filterOptions.vegFilter !== "all") {
       const isVeg = filterOptions.vegFilter === "veg";
       result = result.filter(item => item.isVegetarian === isVeg);
     }
@@ -275,7 +292,7 @@ export const ManageMenu: FC = () => {
       // Get the pre-signed URL from the backend
       const response = await fetch(`http://localhost:3000/generate-presigned-url?fileName=${encodeURIComponent(key)}&fileType=${encodeURIComponent(photo.type)}`);
       if (!response.ok) throw new Error("Failed to get pre-signed URL");
-      console.log(response);
+      // console.log(response);
       
       const { url } = await response.json();
   
@@ -452,11 +469,20 @@ export const ManageMenu: FC = () => {
     });
   };
 
+  // const clearFilters = () => {
+  //   setFilterOptions({
+  //     category: "",
+  //     availabilityFilter: "",
+  //     vegFilter: "",
+  //     searchQuery: ""
+  //   });
+  // };
+
   const clearFilters = () => {
     setFilterOptions({
-      category: "",
-      availabilityFilter: "",
-      vegFilter: "",
+      category: "all",
+      availabilityFilter: "all",
+      vegFilter: "all",
       searchQuery: ""
     });
   };
@@ -472,7 +498,7 @@ export const ManageMenu: FC = () => {
         <Header/>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
           <div className="flex items-center">
-            <h1 className="text-2xl text-primary font-bold">Manage Menu</h1>
+            <h1 className="text-2xl text-primary font-bold">Menu Manager</h1>
           </div>
           
           {/* Top action bar with filters and add button */}
@@ -512,7 +538,7 @@ export const ManageMenu: FC = () => {
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Categories</SelectItem>
+                            <SelectItem value="all">All Categories</SelectItem>
                             {categories.map((cat) => (
                               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                             ))}
@@ -530,7 +556,7 @@ export const ManageMenu: FC = () => {
                             <SelectValue placeholder="Filter by availability" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Items</SelectItem>
+                            <SelectItem value="all">All Items</SelectItem>
                             <SelectItem value="available">Available Only</SelectItem>
                             <SelectItem value="unavailable">Unavailable Only</SelectItem>
                           </SelectContent>
@@ -547,7 +573,7 @@ export const ManageMenu: FC = () => {
                             <SelectValue placeholder="Filter by type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Types</SelectItem>
+                            <SelectItem value="all">All Types</SelectItem>
                             <SelectItem value="veg">Vegetarian Only</SelectItem>
                             <SelectItem value="nonveg">Non-vegetarian Only</SelectItem>
                           </SelectContent>

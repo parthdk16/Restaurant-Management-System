@@ -83,7 +83,7 @@ export const ManageTables: FC = () => {
         createdAt: new Date(),
         status: 'available',
       };
-      console.log(tableData);
+      // console.log(tableData);
 
       const tableRef = doc(db, "Tables", tId);
       await setDoc(tableRef, tableData);
@@ -160,7 +160,7 @@ export const ManageTables: FC = () => {
     try {
       const tableRef = doc(db, "Tables", tableId);
       await updateDoc(tableRef, { status: newStatus });
-      console.log(`Status updated to '${newStatus}' for table ID: ${tableId}`);
+      // console.log(`Status updated to '${newStatus}' for table ID: ${tableId}`);
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -181,7 +181,7 @@ export const ManageTables: FC = () => {
         <Header/>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl text-primary font-bold">Tables</h1>
+            <h1 className="text-2xl text-primary font-bold">Table Manager</h1>
             <div>
               <Button onClick={addTable}>
                 Add new table <Plus/>

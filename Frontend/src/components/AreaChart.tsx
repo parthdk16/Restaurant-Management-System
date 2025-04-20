@@ -7,17 +7,12 @@ const chartConfig = {
     label: "Total Posts",
     color: "hsl(var(--chart-1))",
   },
-  mobile: {
-    label: "Total Job Openings",
-    color: "hsl(var(--chart-2))",
-  },
 } satisfies ChartConfig;
 
 interface AreaChartComponentProps {
   data: {
     month: string;
-    totalPosts: number;
-    totalJobOpenings: number;
+    sales: number;
   }[];
 }
 
@@ -53,21 +48,9 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
                 <stop offset="5%" stopColor="var(--color-desktop)" stopOpacity={0.8} />
                 <stop offset="95%" stopColor="var(--color-desktop)" stopOpacity={0.1} />
               </linearGradient>
-              <linearGradient id="fillJobOpenings" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-mobile)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-mobile)" stopOpacity={0.1} />
-              </linearGradient>
             </defs>
             <Area
-              dataKey="totalJobOpenings"
-              type="natural"
-              fill="url(#fillJobOpenings)"
-              fillOpacity={0.4}
-              stroke="var(--color-mobile)"
-              stackId="a"
-            />
-            <Area
-              dataKey="totalPosts"
+              dataKey="sales"
               type="natural"
               fill="url(#fillPosts)"
               fillOpacity={0.4}

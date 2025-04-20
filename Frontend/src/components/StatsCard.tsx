@@ -27,7 +27,8 @@ export function StatsCard({ title, count, icon }: StatsCardProps) {
         </CardTitle>
         {count === 0 || count === undefined ? (
           <div className="flex justify-center items-center mt-2">
-            <Skeleton className="h-6 w-full" />
+            {/* <Skeleton className="h-6 w-full" /> */}
+            <p className="text-xl font-semibold text-primary text-center">{count}</p>
           </div>
         ) : (
           <p className="mt-2 text-xl font-semibold text-primary text-center">{count}</p>

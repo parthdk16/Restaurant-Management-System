@@ -140,7 +140,7 @@ export const SignIn: FC = () => {
             <h1 className="text-3xl font-bold">Admin Panel</h1>
             {error && <p className="text-red-500 text-xs">{error}</p>}
             <p className="text-muted-foreground">
-              Admin access only - authentication required
+              Admin access only
             </p>
           </div>
           <form onSubmit={handleSignIn} className="grid gap-4">

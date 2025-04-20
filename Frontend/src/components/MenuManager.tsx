@@ -19,19 +19,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "./ui/scroll-area";
 
-if (!process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+if (!import.meta.env.VITE_AWS_REGION || !import.meta.env.VITE_AWS_ACCESS_KEY_ID || !import.meta.env.VITE_AWS_SECRET_ACCESS_KEY) {
   throw new Error("AWS configuration environment variables are missing.");
 }
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
+  region: import.meta.env.VITE_AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
+    secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
   }
 });
 
-const S3_BUCKET = process.env.AWS_BUCKET_NAME;
+const S3_BUCKET = import.meta.env.AWS_BUCKET_NAME;
 
 interface MenuItem {
   id: string;
@@ -175,7 +175,6 @@ export const ManageMenu: FC = () => {
     setDescription("");
     setPrice("");
     setCategory("");
-    setPhoto(null);
     setVeg(false);
     setAvailable(false);
     setPhoto(null);
@@ -206,11 +205,14 @@ export const ManageMenu: FC = () => {
     setUploadingPhoto(true);
 
     try {
+
+      const blob = new Blob([file], { type: file.type });
+
       // Create the upload command
       const uploadParams = {
-        Bucket: S3_BUCKET,
+        Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
         Key: key,
-        Body: file,
+        Body: blob,
         ContentType: file.type,
         ACL: 'public-read' as const
       };
@@ -237,7 +239,7 @@ export const ManageMenu: FC = () => {
   const deleteFromS3 = async (key: string): Promise<void> => {
     try {
       const deleteParams = {
-        Bucket: S3_BUCKET,
+        Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
         Key: key
       };
 
@@ -249,19 +251,57 @@ export const ManageMenu: FC = () => {
     }
   };
 
-  const handlePhotoUpload = async (itemId: string): Promise<{url: string, key: string} | null> => {
-    if (!photo) return null;
+  // const handlePhotoUpload = async (itemId: string): Promise<{url: string, key: string} | null> => {
+  //   if (!photo) return null;
     
+  //   try {
+  //     const fileExt = photo.name.split('.').pop();
+  //     const key = `menu/${itemId}/${Date.now()}.${fileExt}`;
+      
+  //     return await uploadToS3(photo, key);
+  //   } catch (error) {
+  //     console.error("Error uploading photo: ", error);
+  //     throw error;
+  //   }
+  // };
+
+  const handlePhotoUpload = async (itemId: string): Promise<{ url: string, key: string } | null> => {
+    if (!photo) return null;
+  
     try {
       const fileExt = photo.name.split('.').pop();
       const key = `menu/${itemId}/${Date.now()}.${fileExt}`;
+  
+      // Get the pre-signed URL from the backend
+      const response = await fetch(`http://localhost:3000/generate-presigned-url?fileName=${encodeURIComponent(key)}&fileType=${encodeURIComponent(photo.type)}`);
+      if (!response.ok) throw new Error("Failed to get pre-signed URL");
+      console.log(response);
       
-      return await uploadToS3(photo, key);
+      const { url } = await response.json();
+  
+      // Upload the file directly to S3 using the URL
+      const upload = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': photo.type,
+          'x-amz-acl': 'public-read',
+        },
+        body: photo,
+      });
+  
+      if (!upload.ok) {
+        throw new Error("Upload failed");
+      }
+  
+      console.log("✅ Photo uploaded:", url);
+  
+      return { url: url.split('?')[0], key }; // strip query params from final URL
     } catch (error) {
-      console.error("Error uploading photo: ", error);
-      throw error;
+      console.error("❌ Error uploading photo:", error);
+      return null;
     }
   };
+  
 
   const checkItemCodeExists = (code: string, excludeId?: string): boolean => {
     return menuItems.some(item => item.itemCode === code && item.id !== excludeId);

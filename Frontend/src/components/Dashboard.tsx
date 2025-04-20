@@ -73,7 +73,7 @@ export const Dashboard: FC = () => {
         setUser(userDetails);
       } else {
         setUser(null);
-        navigate("/login");
+        navigate("/admin/login");
       }
     });
 
@@ -334,7 +334,7 @@ export const Dashboard: FC = () => {
             </Card>
             <AreaChartComponent data={transactionChartData} />
           </div>
-          <div className="grid gap-4 md:gap-8 grid-cols-1">
+          {/* <div className="grid gap-4 md:gap-8 grid-cols-1">
             <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold leading-none tracking-tight">Posts Overview</CardTitle>
@@ -344,7 +344,7 @@ export const Dashboard: FC = () => {
                 <AreaChartComponent data={areaChartData} />
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </main>
         {loading && <Loader1/>} 
       </div>

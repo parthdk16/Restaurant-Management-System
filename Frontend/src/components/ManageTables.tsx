@@ -62,7 +62,7 @@ export const ManageTables: FC = () => {
         });
       } else {
         setUser(null);
-        navigate("/login");
+        navigate("/admin/login");
       }
     });
     return () => unsubscribe();

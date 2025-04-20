@@ -97,7 +97,7 @@ export const ManageOrders: FC = () => {
       if (currentUser) {
         setUser(currentUser);
       } else {
-        navigate("/login");
+        navigate("/admin/login");
       }
     });
     return () => unsubscribe();
@@ -686,7 +686,7 @@ const OrdersTable: FC<{
 //       if (currentUser) {
 //         setUser(currentUser);
 //       } else {
-//         navigate("/login");
+//         navigate("/admin/login");
 //       }
 //     });
 //     return () => unsubscribe();
@@ -1246,7 +1246,7 @@ const OrdersTable: FC<{
 // //       if (currentUser ) {
 // //         setUser (currentUser );
 // //       } else {
-// //         navigate("/login");
+// //         navigate("/admin/login");
 // //       }
 // //     });
 // //     return () => unsubscribe();

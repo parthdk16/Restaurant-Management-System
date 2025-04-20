@@ -98,7 +98,7 @@ export const EditProfile: FC = () => {
         
       } else {
         setUser(null);
-        navigate("/login"); // Redirect to login if no user is logged in
+        navigate("/admin/login"); // Redirect to login if no user is logged in
       }
     });
 
@@ -187,7 +187,7 @@ export const EditProfile: FC = () => {
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
-    navigate("/login");
+    navigate("/admin/login");
   };
 
   return (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Trash2, Receipt, PlusCircle, MinusCircle, Edit, Search, Vegan } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,22 @@ import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { addDoc, collection, deleteDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { db } from "@/Database/FirebaseConfig";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, 
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import { CheckCircle, QrCode, CreditCard } from "lucide-react";
+
+interface TransactionDetails {
+  paymentMethod: "cash" | "card" | "upi";
+  cashAmount?: number;
+  cashChange?: number;
+  cardType?: string;
+  cardLastFour?: string;
+  upiId?: string;
+  upiReference?: string;
+  customerEmail?: string | null;
+  customerPhone?: string | null;
+}
 
 // Define the MenuItem type based on Firestore structure
 interface MenuItem {
@@ -68,6 +84,25 @@ export function TableCard({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showBill, setShowBill] = useState(false);
   const [splitBill, setSplitBill] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "upi">("cash");
+  const [transactionDetails, setTransactionDetails] = useState<TransactionDetails>({
+    paymentMethod: "cash"
+  });
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [cashAmount, setCashAmount] = useState("");
+  const [cardType, setCardType] = useState("");
+  const [cardLastFour, setCardLastFour] = useState("");
+  const [upiId, setUpiId] = useState("");
+  const [upiReference, setUpiReference] = useState("");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showUpiOptions, setShowUpiOptions] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<'' | 'qr' | 'upi-id'>('');
+  const [upiIdError, setUpiIdError] = useState('');
+  const [upiPaymentInitiated, setUpiPaymentInitiated] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
   
   // Menu state management
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -135,15 +170,123 @@ export function TableCard({
     }
   }, [status, customerName, numberOfGuests, orderItems]);
 
+  const processPayment = async () => {
+    setIsProcessingPayment(true);
+  
+    try {
+      // Build payment details based on selected method
+      const paymentDetails: TransactionDetails = {
+        paymentMethod,
+        customerEmail: customerEmail || null,
+        customerPhone: customerPhone || null
+      };
+  
+      if (paymentMethod === "cash") {
+        const cashAmountValue = parseFloat(cashAmount);
+        paymentDetails.cashAmount = cashAmountValue;
+        paymentDetails.cashChange = cashAmountValue - calculateTotal();
+      } else if (paymentMethod === "card") {
+        paymentDetails.cardType = cardType;
+        paymentDetails.cardLastFour = cardLastFour;
+      } else if (paymentMethod === "upi") {
+        paymentDetails.upiId = upiId;
+        paymentDetails.upiReference = upiReference;
+      }
+  
+      // Record transaction in Firestore
+      const transactionsCollection = collection(db, "Transactions");
+      await addDoc(transactionsCollection, {
+        tableId: id,
+        tableNo: tableNo,
+        customerName: customerName,
+        customerEmail: customerEmail || null,
+        customerPhone: customerPhone || null,
+        paymentMethod: paymentMethod,
+        paymentDetails: paymentDetails,
+        paymentStatus: "paid",
+        type: "payment",
+        items: orderItems,
+        subtotal: calculateSubtotal(),
+        tax: calculateTax(),
+        amount: calculateTotal(),
+        createdAt: new Date()
+      });
+      
+      // Once transaction is recorded, proceed with order completion
+      await completeOrder(paymentDetails);
+      
+      setPaymentSuccess(true);
+      setShowSuccessDialog(true);
+    } catch (error) {
+      console.error("Error processing payment:", error);
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   // When table is billed, move data to completed orders
-  const completeOrder = async () => {
+  // const completeOrder = async () => {
+  //   try {
+  //     // 1. Create completed order record
+  //     const completedOrdersCollection = collection(db, "Orders");
+  //     await addDoc(completedOrdersCollection, {
+  //       tableId: id,
+  //       tableNo: tableNo,
+  //       customerName: customerName,
+  //       numberOfGuests: numberOfGuests,
+  //       items: orderItems,
+  //       subtotal: calculateSubtotal(),
+  //       tax: calculateTax(),
+  //       total: calculateTotal(),
+  //       timestamp: new Date(),
+  //       splitAmount: splitBill > 1 ? (calculateTotal() / splitBill) : null,
+  //       splitCount: splitBill
+  //     });
+      
+  //     // 2. Delete the active table order
+  //     const tableOrdersCollection = collection(db, "TableOrders");
+  //     const orderSnapshot = await getDocs(query(tableOrdersCollection, where("tableId", "==", id)));
+  //     if (!orderSnapshot.empty) {
+  //       const docRef = orderSnapshot.docs[0].ref;
+  //       await deleteDoc(docRef);
+  //     }
+      
+  //     // 3. Reset local state
+  //     setStatus("available");
+  //     setOrderItems([]);
+  //     setCustomerName("");
+  //     setNumberOfGuests(1);
+  //     setShowBill(false);
+  //     setCurrentTab("status");
+  //     setIsDialogOpen(false);
+  //     onStatusChange(id, "available");
+  //   } catch (error) {
+  //     console.error("Error completing order:", error);
+  //   }
+  // };
+
+  const validateAndProceedUpiPayment = () => {
+    // Simple UPI ID validation
+    const upiRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
+    if (!upiRegex.test(upiId)) {
+      setUpiIdError('Please enter a valid UPI ID (e.g., username@bankname)');
+      return;
+    }
+    
+    setUpiIdError('');
+    setUpiPaymentInitiated(true);
+  };
+
+  const completeOrder = async (paymentDetails?: TransactionDetails) => {
     try {
       // 1. Create completed order record
-      const completedOrdersCollection = collection(db, "CompletedOrders");
+      const completedOrdersCollection = collection(db, "Orders");
       await addDoc(completedOrdersCollection, {
         tableId: id,
         tableNo: tableNo,
         customerName: customerName,
+        customerEmail: customerEmail,
+        customerPhone: customerPhone,
         numberOfGuests: numberOfGuests,
         items: orderItems,
         subtotal: calculateSubtotal(),
@@ -151,7 +294,8 @@ export function TableCard({
         total: calculateTotal(),
         timestamp: new Date(),
         splitAmount: splitBill > 1 ? (calculateTotal() / splitBill) : null,
-        splitCount: splitBill
+        splitCount: splitBill,
+        payment: paymentDetails || null
       });
       
       // 2. Delete the active table order
@@ -168,12 +312,24 @@ export function TableCard({
       setCustomerName("");
       setNumberOfGuests(1);
       setShowBill(false);
+      resetPaymentDetails();
       setCurrentTab("status");
-      setIsDialogOpen(false);
       onStatusChange(id, "available");
     } catch (error) {
       console.error("Error completing order:", error);
     }
+  };
+
+  const resetPaymentDetails = () => {
+    setPaymentMethod("cash");
+    setCashAmount("");
+    setCardType("");
+    setCardLastFour("");
+    setUpiId("");
+    setUpiReference("");
+    setCustomerEmail("");
+    setCustomerPhone("");
+    setTransactionDetails({ paymentMethod: "cash" });
   };
 
   // Fetch menu items from Firestore
@@ -438,11 +594,12 @@ export function TableCard({
           <Separator className="my-4" />
 
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4">
-              <TabsTrigger value="status">Table Status</TabsTrigger>
-              <TabsTrigger value="order" disabled={status !== "occupied"}>Order Management</TabsTrigger>
-              <TabsTrigger value="bill" disabled={orderItems.length === 0 || status !== "occupied"}>Bill</TabsTrigger>
-            </TabsList>
+          <TabsList className="grid grid-cols-4 mb-4">
+            <TabsTrigger value="status">Table Status</TabsTrigger>
+            <TabsTrigger value="order" disabled={status !== "occupied"}>Order Management</TabsTrigger>
+            <TabsTrigger value="bill" disabled={orderItems.length === 0 || status !== "occupied"}>Bill</TabsTrigger>
+            <TabsTrigger value="payment" disabled={orderItems.length === 0 || status !== "occupied"}>Payment</TabsTrigger>
+          </TabsList>
 
             {/* Table Status Tab */}
             <TabsContent value="status" className="space-y-4">
@@ -771,7 +928,7 @@ export function TableCard({
                   </div>
                 )}
                 
-                <div className="mt-6 flex justify-end space-x-2">
+                {/* <div className="mt-6 flex justify-end space-x-2">
                   <Button
                     variant="outline"
                     onClick={() => setCurrentTab("order")}
@@ -783,10 +940,341 @@ export function TableCard({
                   >
                     Finalize and Close Table
                   </Button>
+                </div> */}
+                <div className="mt-6 flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentTab("order")}
+                  >
+                    Back to Order
+                  </Button>
+                  <Button
+                    onClick={() => setCurrentTab("payment")}
+                  >
+                    Proceed to Payment
+                  </Button>
                 </div>
               </div>
               </ScrollArea>
             </TabsContent>
+
+            <TabsContent value="payment" className="space-y-4">
+              <ScrollArea className="h-[400px] p-4">
+                <div className="border rounded-lg p-6 max-w-2xl mx-auto">
+                  <h2 className="text-center text-2xl font-bold mb-6">Payment Processing</h2>
+                  
+                  <div className="mb-6">
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Total Amount Due:</span>
+                      <span className="text-xl font-bold">₹{calculateTotal().toFixed(2)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div className="grid gap-3">
+                      <Label className="text-left font-semibold">Customer Information (Optional)</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="customerEmail">Email</Label>
+                          <Input
+                            id="customerEmail"
+                            type="email"
+                            placeholder="customer@email.com"
+                            value={customerEmail}
+                            onChange={(e) => setCustomerEmail(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="customerPhone">Phone Number</Label>
+                          <Input
+                            id="customerPhone"
+                            type="tel"
+                            placeholder="Phone Number"
+                            value={customerPhone}
+                            onChange={(e) => setCustomerPhone(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <Label className="text-left font-semibold mb-2 block">Payment Method</Label>
+                      <RadioGroup value={paymentMethod} onValueChange={(value) => {
+                        setPaymentMethod(value as "cash" | "card" | "upi");
+                        // Reset UPI state when changing payment method
+                        if (value !== "upi") {
+                          setShowUpiOptions(false);
+                          setPaymentMode('');
+                          setUpiId('');
+                          setUpiIdError('');
+                          setUpiPaymentInitiated(false);
+                          setShowQrCode(false);
+                        }
+                      }}>
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-start space-x-2 border p-4 rounded-md">
+                            <RadioGroupItem value="cash" id="cash" />
+                            <div className="grid gap-1 w-full">
+                              <Label htmlFor="cash" className="font-medium">Cash</Label>
+                              {paymentMethod === "cash" && (
+                                <div className="mt-2 space-y-3">
+                                  <div>
+                                    <Label htmlFor="cashAmount">Amount Received</Label>
+                                    <Input
+                                      id="cashAmount"
+                                      type="number"
+                                      placeholder="Enter amount"
+                                      value={cashAmount}
+                                      onChange={(e) => setCashAmount(e.target.value)}
+                                    />
+                                  </div>
+                                  {parseFloat(cashAmount) > 0 && (
+                                    <div>
+                                      <Label>Change Due</Label>
+                                      <div className="p-2 bg-gray-50 border rounded">
+                                        ₹{Math.max(0, parseFloat(cashAmount) - calculateTotal()).toFixed(2)}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start space-x-2 border p-4 rounded-md">
+                            <RadioGroupItem value="card" id="card" />
+                            <div className="grid gap-1 w-full">
+                              <Label htmlFor="card" className="font-medium">Card Payment</Label>
+                              {paymentMethod === "card" && (
+                                <div className="mt-2 space-y-3">
+                                  <div>
+                                    <Label htmlFor="cardType">Card Type</Label>
+                                    <Select value={cardType} onValueChange={setCardType}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select Card Type" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="visa">Visa</SelectItem>
+                                        <SelectItem value="mastercard">Mastercard</SelectItem>
+                                        <SelectItem value="amex">American Express</SelectItem>
+                                        <SelectItem value="rupay">RuPay</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="cardLastFour">Last 4 Digits</Label>
+                                    <Input
+                                      id="cardLastFour"
+                                      maxLength={4}
+                                      placeholder="1234"
+                                      value={cardLastFour}
+                                      onChange={(e) => {
+                                        // Allow only numbers and limit to 4 digits
+                                        const value = e.target.value.replace(/[^\d]/g, '').slice(0, 4);
+                                        setCardLastFour(value);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start space-x-2 border p-4 rounded-md">
+                            <RadioGroupItem value="upi" id="upi" />
+                            <div className="grid gap-1 w-full">
+                              <Label htmlFor="upi" className="font-medium">UPI Payment</Label>
+                              {paymentMethod === "upi" && (
+                                <div className="mt-2">
+                                  <Button 
+                                    variant="outline" 
+                                    className="w-full py-6" 
+                                    onClick={() => setShowUpiOptions(true)}
+                                  >
+                                    <div className="flex items-center justify-center gap-2">
+                                      <QrCode className="h-5 w-5" />
+                                      <span>Select UPI Payment Method</span>
+                                    </div>
+                                  </Button>
+                                  {upiPaymentInitiated && (
+                                    <div className="flex items-center gap-2 text-green-600 mt-2">
+                                      <CheckCircle className="h-4 w-4" />
+                                      <span className="text-sm">Payment initiated, waiting for confirmation</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentTab("bill")}
+                    >
+                      Back to Bill
+                    </Button>
+                    <Button
+                      onClick={processPayment}
+                      disabled={isProcessingPayment || 
+                        (paymentMethod === "cash" && (!cashAmount || parseFloat(cashAmount) < calculateTotal())) ||
+                        (paymentMethod === "card" && (!cardType || !cardLastFour || cardLastFour.length !== 4)) ||
+                        (paymentMethod === "upi" && (!upiId || !upiPaymentInitiated))
+                      }
+                    >
+                      {isProcessingPayment ? "Processing..." : "Confirm Payment"}
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+
+              {/* UPI Payment Options Dialog */}
+              <Dialog open={showUpiOptions} onOpenChange={setShowUpiOptions}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>UPI Payment</DialogTitle>
+                  </DialogHeader>
+                  
+                  <div className="grid gap-4 py-4">
+                    <p className="text-center font-medium">Select Payment Method</p>
+                    
+                    <div className="flex justify-center gap-4">
+                      <Button 
+                        variant="outline" 
+                        className="flex flex-col items-center p-4 h-auto"
+                        onClick={() => {
+                          setPaymentMode('qr');
+                          setShowQrCode(true);
+                        }}
+                      >
+                        <QrCode className="h-8 w-8 mb-2" />
+                        <span>Scan QR Code</span>
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="flex flex-col items-center p-4 h-auto"
+                        onClick={() => setPaymentMode('upi-id')}
+                      >
+                        <CreditCard className="h-8 w-8 mb-2" />
+                        <span>Enter UPI ID</span>
+                      </Button>
+                    </div>
+                    
+                    {paymentMode === 'qr' && showQrCode && (
+                      <div className="flex flex-col items-center p-4 border rounded-lg">
+                        <div className="bg-white p-4 rounded-lg mb-3">
+                          {/* Using placeholder image for QR code */}
+                          <div className="h-48 w-48 bg-gray-100 flex items-center justify-center">
+                            <QrCode className="h-32 w-32 text-gray-400" />
+                          </div>
+                        </div>
+                        <p className="text-sm text-center mb-4">Scan this QR code to pay ₹{calculateTotal().toFixed(2)}</p>
+                        <Button 
+                          onClick={() => {
+                            setUpiPaymentInitiated(true);
+                            setUpiId("QR_SCAN_" + Math.random().toString(36).substring(2, 10));
+                            setUpiReference("QR_" + Date.now().toString().substring(6));
+                            setShowUpiOptions(false);
+                          }}
+                          className="w-full"
+                        >
+                          I've Paid
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {paymentMode === 'upi-id' && (
+                      <div className="flex flex-col gap-4">
+                        <div>
+                          <Label htmlFor="upiId">Enter your UPI ID</Label>
+                          <div className="flex gap-2">
+                            <Input 
+                              id="upiId" 
+                              value={upiId} 
+                              onChange={(e) => setUpiId(e.target.value)}
+                              placeholder="yourname@bankname" 
+                            />
+                          </div>
+                          {upiIdError && (
+                            <p className="text-destructive text-sm mt-1">{upiIdError}</p>
+                          )}
+                        </div>
+                        
+                        <Button 
+                          onClick={validateAndProceedUpiPayment}
+                          disabled={!upiId || upiIdError !== ''}
+                        >
+                          Pay ₹{calculateTotal().toFixed(2)}
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {paymentMode === 'upi-id' && upiPaymentInitiated && (
+                      <div className="flex flex-col items-center p-4 border rounded-lg mt-2">
+                        <div className="flex items-center gap-2 text-green-600 mb-2">
+                          <CheckCircle className="h-5 w-5" />
+                          <span>Payment initiated</span>
+                        </div>
+                        <p className="text-sm text-center mb-4">Check your UPI app to approve the payment</p>
+                        <Button 
+                          onClick={() => {
+                            setUpiReference("UPI_" + Date.now().toString().substring(6));
+                            setShowUpiOptions(false);
+                          }}
+                          className="w-full"
+                        >
+                          I've Paid
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setShowUpiOptions(false);
+                        setPaymentMode('');
+                        setUpiId('');
+                        setUpiIdError('');
+                        setUpiPaymentInitiated(false);
+                        setShowQrCode(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </TabsContent>
+
+            {/* Payment success dialog */}
+            <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Payment Successful</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Payment has been processed successfully and the table has been marked as available.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction onClick={() => {
+                    setIsDialogOpen(false);
+                    setShowSuccessDialog(false);
+                  }}>
+                    Close
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </Tabs>
         </DialogContent>
       </Dialog>

@@ -18,6 +18,8 @@ import { SecuritySettings } from './components/SecuritySettings';
 import { RestaurantLandingPage } from './components/CustomerLanding';
 import { InventoryItemList } from './components/InventoryItemList';
 import { CustomerLogin } from './components/CustomerLogin';
+import { DeliverySignIn } from './components/DeliveryLogin';
+import { DeliveryDashboard } from './components/DeliveryDashboard';
 
 const App: React.FC = () => {
   return (
@@ -41,6 +43,8 @@ const App: React.FC = () => {
           <Route path="/restaurant" element={ <RestaurantLandingPage/>} />
           <Route path="/security" element={ <SecuritySettings/>} />
           <Route path="/manage-inventory" element={ <InventoryItemList/>} />
+          <Route path="/delivery/login" element={ <DeliverySignIn/>} />
+          <Route path="/delivery/dashboard" element={ <DeliveryDashboard/>} />
           <Route path="*" element={<NotFound />} />
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute> } />
         </Routes>

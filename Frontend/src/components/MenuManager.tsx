@@ -108,7 +108,7 @@ export const ManageMenu: FC = () => {
       if (currentUser) {
         setUser(currentUser);
       } else {
-        navigate("/login");
+        navigate("/admin/login");
       }
     });
     return () => unsubscribe();
@@ -1012,7 +1012,7 @@ export const ManageMenu: FC = () => {
 //       if (currentUser) {
 //         setUser(currentUser);
 //       } else {
-//         navigate("/login");
+//         navigate("/admin/login");
 //       }
 //     });
 //     return () => unsubscribe();
@@ -1574,7 +1574,7 @@ export const ManageMenu: FC = () => {
 // //       if (currentUser ) {
 // //         setUser(currentUser);
 // //       } else {
-// //         navigate("/login");
+// //         navigate("/admin/login");
 // //       }
 // //     });
 // //     return () => unsubscribe();

@@ -100,13 +100,13 @@ export const FoodOrderingPage: FC = () => {
 
   const { theme } = useTheme();
 
-  const sweetAlertOptions = {
-    background: theme === "dark" ? 'rgba(0, 0, 0, 0.9)' : '#fff',
-    color: theme === "dark" ? '#fff' : '#000',
-    confirmButtonText: 'OK',
-    confirmButtonColor: theme === "dark" ? '#3085d6' : '#0069d9',
-    cancelButtonColor: theme === "dark" ? '#d33' : '#dc3545',
-  };
+  // const sweetAlertOptions = {
+  //   background: theme === "dark" ? 'rgba(0, 0, 0, 0.9)' : '#fff',
+  //   color: theme === "dark" ? '#fff' : '#000',
+  //   confirmButtonText: 'OK',
+  //   confirmButtonColor: theme === "dark" ? '#3085d6' : '#0069d9',
+  //   cancelButtonColor: theme === "dark" ? '#d33' : '#dc3545',
+  // };
 
   // Calculate cart totals
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -142,7 +142,7 @@ export const FoodOrderingPage: FC = () => {
     } catch (error) {
       console.error("Error fetching food items:", error);
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Error!",
         text: "Failed to load menu items. Please refresh the page.",
         icon: "error"
@@ -197,7 +197,7 @@ export const FoodOrderingPage: FC = () => {
   const validateOrder = (): boolean => {
     if (!customerInfo.name || !customerInfo.phone || !customerInfo.email) {
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Missing Information",
         text: "Please provide your name and phone number.",
         icon: "warning"
@@ -207,7 +207,7 @@ export const FoodOrderingPage: FC = () => {
 
     if (customerInfo.phone.length !== 10 || !/^\d+$/.test(customerInfo.phone)) {
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Invalid Phone Number",
         text: "Please enter a valid 10-digit phone number.",
         icon: "warning"
@@ -217,7 +217,7 @@ export const FoodOrderingPage: FC = () => {
 
     if (customerInfo.orderType === 'delivery' && !customerInfo.deliveryAddress) {
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Missing Address",
         text: "Please provide your delivery address.",
         icon: "warning"
@@ -225,15 +225,15 @@ export const FoodOrderingPage: FC = () => {
       return false;
     }
 
-    if (customerInfo.orderType === 'dine-in' && !customerInfo.tableNumber) {
-      Swal.fire({
-        ...sweetAlertOptions,
-        title: "Missing Table Number",
-        text: "Please provide your table number.",
-        icon: "warning"
-      });
-      return false;
-    }
+    // if (customerInfo.orderType === 'dine-in' && !customerInfo.tableNumber) {
+    //   Swal.fire({
+    //     ...sweetAlertOptions,
+    //     title: "Missing Table Number",
+    //     text: "Please provide your table number.",
+    //     icon: "warning"
+    //   });
+    //   return false;
+    // }
 
     return true;
   };
@@ -317,7 +317,7 @@ export const FoodOrderingPage: FC = () => {
       setShowQrCode(false);
       
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Payment Successful!",
         text: "Your order has been placed successfully.",
         icon: "success"
@@ -326,7 +326,7 @@ export const FoodOrderingPage: FC = () => {
     } catch (error) {
       console.error("Error processing payment:", error);
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Error!",
         text: "Failed to process payment. Please try again.",
         icon: "error"
@@ -404,7 +404,7 @@ export const FoodOrderingPage: FC = () => {
     if (!validateOrder()) return;
     if (cart.length === 0) {
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Empty Cart",
         text: "Please add items to your cart before placing an order.",
         icon: "warning"
@@ -443,7 +443,7 @@ export const FoodOrderingPage: FC = () => {
       setCart([]);
       
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Order Placed Successfully!",
         text: "Your order has been received and is being processed.",
         icon: "success"
@@ -454,7 +454,7 @@ export const FoodOrderingPage: FC = () => {
     } catch (error) {
       console.error("Error placing order:", error);
       Swal.fire({
-        ...sweetAlertOptions,
+        // ...sweetAlertOptions,
         title: "Error!",
         text: "Failed to place your order. Please try again.",
         icon: "error"
@@ -652,9 +652,9 @@ export const FoodOrderingPage: FC = () => {
 
       {/* Cart Dialog */}
       <Dialog open={isCartOpen} onOpenChange={setIsCartOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black">
               <ShoppingBag className="size-4" />
               Your Order
             </DialogTitle>
@@ -680,7 +680,7 @@ export const FoodOrderingPage: FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center">
                         <span className={`w-2 h-2 rounded-full mr-2 ${item.isVegetarian ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                        <h4 className="font-medium">{item.name}</h4>
+                        <h4 className="font-medium text-black">{item.name}</h4>
                       </div>
                       <p className="text-sm text-gray-500">₹{item.price.toFixed(2)}</p>
                     </div>
@@ -694,7 +694,7 @@ export const FoodOrderingPage: FC = () => {
                       >
                         <Minus className="size-3" />
                       </Button>
-                      <span className="w-6 text-center">{item.quantity}</span>
+                      <span className="w-6 text-center text-black">{item.quantity}</span>
                       <Button 
                         variant="outline" 
                         size="icon" 
@@ -716,7 +716,7 @@ export const FoodOrderingPage: FC = () => {
                 ))}
               </div>
               
-              <div className="space-y-2 pt-2">
+              <div className="space-y-2 pt-2 text-black">
                 <div className="flex justify-between text-sm">
                   <span>Subtotal</span>
                   <span>₹{subtotal.toFixed(2)}</span>
@@ -964,12 +964,12 @@ export const FoodOrderingPage: FC = () => {
 
       {/* Checkout Dialog */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg bg-white">
           <DialogHeader>
-            <DialogTitle>Complete Your Order</DialogTitle>
+            <DialogTitle className="text-black">Complete Your Order</DialogTitle>
           </DialogHeader>
           
-          <ScrollArea className="max-h-[400px] mb-4 pr-4">
+          <ScrollArea className="max-h-[400px] mb-4 pr-4 bg-white text-black">
           <div className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -1013,16 +1013,16 @@ export const FoodOrderingPage: FC = () => {
                 value={customerInfo.orderType} 
                 onValueChange={(value) => handleSelectChange('orderType', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-white text-black">
                   <SelectValue placeholder="Select order type" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="dine-in">
+                <SelectContent className="bg-white text-black">
+                  {/* <SelectItem value="dine-in">
                     <div className="flex items-center gap-2">
                       <Utensils className="size-4" />
                       Dine-in
                     </div>
-                  </SelectItem>
+                  </SelectItem> */}
                   <SelectItem value="takeaway">
                     <div className="flex items-center gap-2">
                       <ShoppingBag className="size-4" />
@@ -1039,7 +1039,7 @@ export const FoodOrderingPage: FC = () => {
               </Select>
             </div>
             
-            {customerInfo.orderType === 'dine-in' && (
+            {/* {customerInfo.orderType === 'dine-in' && (
               <div>
                 <Label htmlFor="tableNumber">Table Number</Label>
                 <Input 
@@ -1051,7 +1051,7 @@ export const FoodOrderingPage: FC = () => {
                   required 
                 />
               </div>
-            )}
+            )} */}
             
             {customerInfo.orderType === 'delivery' && (
               <div>
@@ -1074,10 +1074,10 @@ export const FoodOrderingPage: FC = () => {
                 value={customerInfo.paymentMethod} 
                 onValueChange={(value) => handleSelectChange('paymentMethod', value as any)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-white text-black">
                   <SelectValue placeholder="Select payment method" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-black">
                   <SelectItem value="cash">Cash</SelectItem>
                   <SelectItem value="card">Card on Delivery</SelectItem>
                   <SelectItem value="online">UPI</SelectItem>
@@ -1296,7 +1296,7 @@ const FoodItemCard: FC<{
   onUpdateQuantity: (itemId: string, quantity: number) => void;
 }> = ({ item, onAddToCart, cartItem, onUpdateQuantity }) => {
   return (
-    <Card className="overflow-hidden max-w-s hover:shadow-lg transition-shadow hover:scale-[95%] transition hover:cursor-pointer duration-200">
+    <Card className="overflow-hidden max-w-s hover:shadow-lg transition-shadow hover:scale-[95%] transition hover:cursor-pointer duration-200 bg-white text-black">
       <div className="aspect-[16/9] bg-gray-100 flex items-center justify-center">
         {item.image ? (
           <img 
@@ -1337,7 +1337,7 @@ const FoodItemCard: FC<{
             >
               <Minus className="size-4" />
             </Button>
-            <span className="w-8 text-center font-medium">{cartItem.quantity}</span>
+            <span className="w-8 text-center font-medium text-black">{cartItem.quantity}</span>
             <Button 
               variant="outline" 
               size="icon" 
@@ -1349,7 +1349,7 @@ const FoodItemCard: FC<{
           </div>
         ) : (
           <Button 
-            className="w-1/2 text-teal-600 border-teal-600 hover:bg-teal-50"
+            className="w-1/2 text-teal-600 border-teal-600 hover:bg-teal-50 dark:text-teal-600 dark:bg-white dark:hover:text-teal-600 border-teal-600 dark:hover:bg-teal-50"
             variant='outline'
             onClick={() => onAddToCart(item)}
           >

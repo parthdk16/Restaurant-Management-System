@@ -638,7 +638,7 @@ const TransactionsTable: FC<{
         </thead>
         <tbody>
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className="border-b hover:bg-gray-50">
+            <tr key={transaction.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
               <td className="px-4 py-3">#{transaction.id.slice(-6)}</td>
               <td className="px-4 py-3 whitespace-nowrap">{formatDate(transaction.createdAt)}</td>
               <td className="px-4 py-3">

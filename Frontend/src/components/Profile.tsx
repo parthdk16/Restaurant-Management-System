@@ -291,21 +291,21 @@ export const EditProfile: FC = () => {
               <div className="pt-8 flex items-center">
               <div>
               {user?.photoURL ? (
-                        <img
-                          src={user.photoURL}
-                          alt="User Avatar"
-                          className="h-20 w-20 rounded-full"
-                        />
-                      ) : (
-                        <CircleUser className="h-5 w-5" />
-                      )}
+                <img
+                  src={user.photoURL}
+                  alt="User Avatar"
+                  className="h-20 w-20 rounded-full"
+                />
+                ) : (
+                  <CircleUser className="h-5 w-5" />
+                )}
               </div>
                 <Trash2 className="ml-2 text-red-500 cursor-pointer"/>
               </div>
 
               <div className=" pt-4 flex flex-wrap gap-4">
                 <div className="flex-1 sm:col-span-3 mr-3">
-                  <Label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                  <Label htmlFor="first-name" className="block text-sm font-medium leading-6">
                     First Name
                   </Label>
                   <div className="mt-2">
@@ -317,13 +317,13 @@ export const EditProfile: FC = () => {
                       value={firstName || ''}
                       onChange={(e) => setFirstName(e.target.value)}
                       disabled={isGoogleUser}
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>
 
                 <div className="flex-1 sm:col-span-3">
-                  <Label htmlFor="last-name" className="block text-sm font-medium leading-6 text-gray-900">
+                  <Label htmlFor="last-name" className="block text-sm font-medium leading-6">
                     Last Name
                   </Label>
                   <div className="mt-2">
@@ -335,7 +335,7 @@ export const EditProfile: FC = () => {
                     value={lastName || ''}
                     onChange={(e) => setLastName(e.target.value)}
                     disabled={isGoogleUser}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export const EditProfile: FC = () => {
               <p className="text-sm text-muted-foreground pb-3 flex flex-row">This is your public display name.{isGoogleUser && <p> (Non-editable due to Google Sign-in)</p>}</p>
 
               <div className="mt-4">
-                <Label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                <Label htmlFor="email" className="block text-sm font-medium leading-6">
                   Email
                 </Label>
                 <div className="mt-2">
@@ -355,7 +355,7 @@ export const EditProfile: FC = () => {
                   disabled
                   value={email || ''}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
                 </div>
               </div>
@@ -364,7 +364,7 @@ export const EditProfile: FC = () => {
 
               <div className="flex flex-wrap gap-4">
                 <div className="flex-1 sm:col-span-3 mr-3">
-                  <Label htmlFor="phone-no" className="block text-sm font-medium leading-6 text-gray-900">
+                  <Label htmlFor="phone-no" className="block text-sm font-medium leading-6">
                     Phone Number
                   </Label>
                   <div className="mt-2">
@@ -375,14 +375,14 @@ export const EditProfile: FC = () => {
                       id="phone-no"
                       value={phone || ''}
                       onChange={(e) => setPhone(Number(e.target.value))}
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                     <p className="text-sm text-muted-foreground pb-3">Please add your country code at the beginning of your phone number.</p>
                   </div>
                 </div>
 
                 <div className="flex-1 sm:col-span-3">
-                  <Label htmlFor="gender" className="block text-sm font-medium leading-6 text-gray-900">
+                  <Label htmlFor="gender" className="block text-sm font-medium leading-6">
                     Gender
                   </Label>
                   <div className="mt-2">
@@ -405,7 +405,7 @@ export const EditProfile: FC = () => {
 
               <div className="flex flex-wrap gap-4 mt-4">
                 <div className="flex-1 sm:col-span-3 mr-3">
-                  <Label htmlFor="company" className="block text-sm font-medium leading-6 text-gray-900">
+                  <Label htmlFor="company" className="block text-sm font-medium leading-6">
                     Company
                   </Label>
                   <div className="mt-2">
@@ -416,14 +416,14 @@ export const EditProfile: FC = () => {
                       id="company"
                       value={company || ''}
                       onChange={(e) => setCompany(e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                   </div>
                   <p className="text-sm text-muted-foreground pb-3">Please enter the company name you work at. Keep blank if seeking first opportunity.</p>
                 </div>
 
                 <div className="flex-1 sm:col-span-3">
-                  <Label htmlFor="department" className="block text-sm font-medium leading-6 text-gray-900">
+                  <Label htmlFor="department" className="block text-sm font-medium leading-6">
                     Department
                   </Label>
                   <div className="mt-2">
@@ -434,7 +434,7 @@ export const EditProfile: FC = () => {
                       id="department"
                       value={department || ''}
                       onChange={(e) => setDepartment(e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                   </div>
                 </div>

@@ -531,7 +531,7 @@ const OrdersTable: FC<{
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order.id} className="border-b hover:bg-gray-50">
+            <tr key={order.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
               <td className="px-4 py-3">#{order.id.slice(-6)}</td>
               <td className="px-4 py-3">
                 {order.customerName}<br />

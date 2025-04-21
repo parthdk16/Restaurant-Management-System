@@ -335,7 +335,7 @@ export const InventoryItemList: FC = () => {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Categories</SelectItem>
+                        <SelectItem value="all">All Categories</SelectItem>
                         <SelectItem value="vegetables">Vegetables</SelectItem>
                         <SelectItem value="fruits">Fruits</SelectItem>
                         <SelectItem value="dairy">Dairy</SelectItem>

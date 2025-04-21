@@ -9,6 +9,7 @@ import {
   ListOrdered,
   BadgeIndianRupee,
   LockKeyhole,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from '@/assets/logoLandscape.png'; 
@@ -74,19 +75,19 @@ export const Sidebar: FC<SidebarProps> = ({ activePage, user }) => {
           Transactions
         </Link>
         <Link
+          to="/manage-inventory"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "rounds" ? "bg-muted text-primary" : "text-muted-foreground"}`}
+        >
+          <History className="h-4 w-4" />
+          Inventory Manager
+        </Link>
+        <Link
           to="/security"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "security" ? "bg-muted text-primary" : "text-muted-foreground"}`}
         >
           <LockKeyhole className="h-4 w-4" />
           Security
         </Link>
-        {/* <Link
-          to="/rounds"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "rounds" ? "bg-muted text-primary" : "text-muted-foreground"}`}
-        >
-          <History className="h-4 w-4" />
-          Inventory
-        </Link> */}
         {/* <Link
           to="/onboard"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${activePage === "onboard" ? "bg-muted text-primary" : "text-muted-foreground"}`}

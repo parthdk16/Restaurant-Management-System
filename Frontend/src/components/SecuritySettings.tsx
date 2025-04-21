@@ -268,6 +268,7 @@ export const SecuritySettings: FC = () => {
                             ? formatDistanceToNow(date, { addSuffix: true })
                             : "recently";
                         } catch (e) {
+                          console.error(e);
                           return "recently";
                         }
                       })()
@@ -334,7 +335,8 @@ export const SecuritySettings: FC = () => {
                                 ? formatDistanceToNow(date, { addSuffix: true })
                                 : "recently";
                             } catch (e) {
-                            return "recently";
+                              console.error(e);
+                              return "recently";
                             }
                         })()
                         } by {settings?.updatedBy}

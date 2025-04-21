@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { db } from "../Database/FirebaseConfig";
 import { collection, getDocs, addDoc, serverTimestamp, query, where } from "firebase/firestore";
 import Swal from 'sweetalert2';
-import { useTheme } from './theme-provider';
 import {
   Card,
   CardContent,
@@ -97,16 +96,6 @@ export const FoodOrderingPage: FC = () => {
   const [paymentMode, setPaymentMode] = useState('');
   const [upiIdError, setUpiIdError] = useState('');
   const [upiPaymentInitiated, setUpiPaymentInitiated] = useState(false);
-
-  const { theme } = useTheme();
-
-  // const sweetAlertOptions = {
-  //   background: theme === "dark" ? 'rgba(0, 0, 0, 0.9)' : '#fff',
-  //   color: theme === "dark" ? '#fff' : '#000',
-  //   confirmButtonText: 'OK',
-  //   confirmButtonColor: theme === "dark" ? '#3085d6' : '#0069d9',
-  //   cancelButtonColor: theme === "dark" ? '#d33' : '#dc3545',
-  // };
 
   // Calculate cart totals
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -225,16 +214,6 @@ export const FoodOrderingPage: FC = () => {
       return false;
     }
 
-    // if (customerInfo.orderType === 'dine-in' && !customerInfo.tableNumber) {
-    //   Swal.fire({
-    //     ...sweetAlertOptions,
-    //     title: "Missing Table Number",
-    //     text: "Please provide your table number.",
-    //     icon: "warning"
-    //   });
-    //   return false;
-    // }
-
     return true;
   };
 
@@ -334,71 +313,7 @@ export const FoodOrderingPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };  
-
-  // const placeOrder = async () => {
-  //   if (!validateOrder()) return;
-  //   if (cart.length === 0) {
-  //     Swal.fire({
-  //       ...sweetAlertOptions,
-  //       title: "Empty Cart",
-  //       text: "Please add items to your cart before placing an order.",
-  //       icon: "warning"
-  //     });
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsLoading(true);
-      
-  //     const orderData = {
-  //       customerName: customerInfo.name,
-  //       customerPhone: customerInfo.phone,
-  //       customerEmail: customerInfo.email || null,
-  //       items: cart.map(item => ({
-  //         id: item.id,
-  //         name: item.name,
-  //         price: item.price,
-  //         quantity: item.quantity
-  //       })),
-  //       status: 'pending',
-  //       tableNumber: customerInfo.tableNumber || null,
-  //       totalAmount: total,
-  //       paymentMethod: customerInfo.paymentMethod,
-  //       paymentStatus: 'unpaid',
-  //       specialInstructions: customerInfo.specialInstructions || null,
-  //       createdAt: serverTimestamp(),
-  //       updatedAt: serverTimestamp(),
-  //       orderType: customerInfo.orderType,
-  //       deliveryAddress: customerInfo.deliveryAddress || null,
-  //     };
-      
-  //     await addDoc(collection(db, "Orders"), orderData);
-      
-  //     setOrderPlaced(true);
-  //     setCart([]);
-      
-  //     Swal.fire({
-  //       ...sweetAlertOptions,
-  //       title: "Order Placed Successfully!",
-  //       text: "Your order has been received and is being processed.",
-  //       icon: "success"
-  //     });
-      
-  //     setIsCheckoutOpen(false);
-      
-  //   } catch (error) {
-  //     console.error("Error placing order:", error);
-  //     Swal.fire({
-  //       ...sweetAlertOptions,
-  //       title: "Error!",
-  //       text: "Failed to place your order. Please try again.",
-  //       icon: "error"
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  };
 
   const placeOrder = async () => {
     if (!validateOrder()) return;
@@ -558,40 +473,6 @@ export const FoodOrderingPage: FC = () => {
       </header>
 
       <main>
-        {/* <Tabs defaultValue={categories[0] || "all"}>
-          <TabsList className="mb-6 overflow-x-auto flex w-full">
-            <TabsTrigger key='all' value='all' className="whitespace-nowrap">All</TabsTrigger>
-            {categories.map(category => (
-              <TabsTrigger key={category} value={category} className="whitespace-nowrap">
-                {category}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
-          {categories.map(category => (
-            <TabsContent key={category} value={category}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredItems
-                  .filter(item => item.category === category)
-                  .map(item => (
-                    <FoodItemCard 
-                      key={item.id} 
-                      item={item} 
-                      onAddToCart={addToCart} 
-                      cartItem={cart.find(cartItem => cartItem.id === item.id)}
-                      onUpdateQuantity={updateQuantity}
-                    />
-                  ))}
-              </div>
-              
-              {filteredItems.filter(item => item.category === category).length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">No items found in this category with the current filters.</p>
-                </div>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs> */}
         <Tabs defaultValue="all">
           <TabsList className="mb-6 overflow-x-auto flex w-full bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50">
             <TabsTrigger key='all' value='all' className="whitespace-nowrap">All</TabsTrigger>
@@ -759,210 +640,6 @@ export const FoodOrderingPage: FC = () => {
       </Dialog>
 
       {/* Checkout Dialog */}
-      {/* <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Complete Your Order</DialogTitle>
-          </DialogHeader>
-          
-          <ScrollArea className="max-h-[400px] mb-4 pr-4">
-          <div className="grid gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input 
-                  id="name" 
-                  name="name" 
-                  value={customerInfo.name} 
-                  onChange={handleInputChange} 
-                  placeholder="Your Name" 
-                  required 
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input 
-                  id="phone" 
-                  name="phone" 
-                  value={customerInfo.phone} 
-                  onChange={handleInputChange} 
-                  placeholder="10-digit phone number" 
-                  required 
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  value={customerInfo.email} 
-                  onChange={handleInputChange} 
-                  placeholder="your@email.com" 
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="orderType">Order Type</Label>
-              <Select 
-                value={customerInfo.orderType} 
-                onValueChange={(value) => handleSelectChange('orderType', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select order type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="dine-in">
-                    <div className="flex items-center gap-2">
-                      <Utensils className="size-4" />
-                      Dine-in
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="takeaway">
-                    <div className="flex items-center gap-2">
-                      <ShoppingBag className="size-4" />
-                      Takeaway
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="delivery">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="size-4" />
-                      Delivery
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {customerInfo.orderType === 'dine-in' && (
-              <div>
-                <Label htmlFor="tableNumber">Table Number</Label>
-                <Input 
-                  id="tableNumber" 
-                  name="tableNumber" 
-                  value={customerInfo.tableNumber || ''} 
-                  onChange={handleInputChange} 
-                  placeholder="Enter your table number" 
-                  required 
-                />
-              </div>
-            )}
-            
-            {customerInfo.orderType === 'delivery' && (
-              <div>
-                <Label htmlFor="deliveryAddress">Delivery Address</Label>
-                <Textarea 
-                  id="deliveryAddress" 
-                  name="deliveryAddress" 
-                  value={customerInfo.deliveryAddress || ''} 
-                  onChange={handleInputChange} 
-                  placeholder="Enter your full delivery address" 
-                  rows={3} 
-                  required 
-                />
-              </div>
-            )}
-            
-            <div>
-              <Label htmlFor="paymentMethod">Payment Method</Label>
-              <Select 
-                value={customerInfo.paymentMethod} 
-                onValueChange={(value) => handleSelectChange('paymentMethod', value as any)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash">Cash</SelectItem>
-                  <SelectItem value="card">Card on Delivery</SelectItem>
-                  <SelectItem value="online">UPI</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="specialInstructions">Special Instructions (Optional)</Label>
-              <Textarea 
-                id="specialInstructions" 
-                name="specialInstructions" 
-                value={customerInfo.specialInstructions || ''} 
-                onChange={handleInputChange} 
-                placeholder="Any allergies, preferences, or special requests?" 
-                rows={3} 
-              />
-            </div>
-            
-            <Accordion type="single" collapsible>
-              <AccordionItem value="order-summary">
-                <AccordionTrigger>
-                  Order Summary (₹{total.toFixed(2)})
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3">
-                    {cart.map(item => (
-                      <div key={item.id} className="flex justify-between text-sm">
-                        <span>
-                          {item.name} x {item.quantity}
-                        </span>
-                        <span>₹{(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
-                    <div className="pt-2 border-t space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>Subtotal</span>
-                        <span>₹{subtotal.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Tax (5%)</span>
-                        <span>₹{tax.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Delivery Fee</span>
-                        <span>₹{deliveryFee.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between font-bold pt-1 border-t">
-                        <span>Total</span>
-                        <span>₹{total.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-          </ScrollArea>
-          
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
-              className="w-full sm:w-auto"
-              onClick={() => {
-                setIsCheckoutOpen(false);
-                setIsCartOpen(true);
-              }}
-            >
-              Back to Cart
-            </Button>
-            <Button 
-              className="w-full sm:w-auto" 
-              onClick={placeOrder}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent"></div>
-                  Processing...
-                </span>
-              ) : (
-                'Place Order'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
-
-      {/* Checkout Dialog */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
         <DialogContent className="sm:max-w-lg bg-white">
           <DialogHeader>
@@ -1017,12 +694,6 @@ export const FoodOrderingPage: FC = () => {
                   <SelectValue placeholder="Select order type" />
                 </SelectTrigger>
                 <SelectContent className="bg-white text-black">
-                  {/* <SelectItem value="dine-in">
-                    <div className="flex items-center gap-2">
-                      <Utensils className="size-4" />
-                      Dine-in
-                    </div>
-                  </SelectItem> */}
                   <SelectItem value="takeaway">
                     <div className="flex items-center gap-2">
                       <ShoppingBag className="size-4" />
@@ -1038,20 +709,6 @@ export const FoodOrderingPage: FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            
-            {/* {customerInfo.orderType === 'dine-in' && (
-              <div>
-                <Label htmlFor="tableNumber">Table Number</Label>
-                <Input 
-                  id="tableNumber" 
-                  name="tableNumber" 
-                  value={customerInfo.tableNumber || ''} 
-                  onChange={handleInputChange} 
-                  placeholder="Enter your table number" 
-                  required 
-                />
-              </div>
-            )} */}
             
             {customerInfo.orderType === 'delivery' && (
               <div>

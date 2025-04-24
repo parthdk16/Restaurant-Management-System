@@ -1,10 +1,10 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { User, ClipboardList, Home, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from '@/assets/logoLandscape.png';
-import { auth } from "@/Database/FirebaseConfig";
-import { useNavigate } from "react-router-dom";
 import { FoodOrderingPage } from "./FoodOrderPage";
+import ProfilePage from "./CustomerProfile";
+import { OrdersPage } from "./MyOrders";
 
 interface User {
     uid: string;
@@ -13,93 +13,10 @@ interface User {
     photoURL: string | null;
   }
 
-interface FoodItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image?: string;
-  isVegetarian: boolean;
-  isAvailable: boolean;
-  isPopular?: boolean;
-}
-
-interface CartItem extends FoodItem {
-  quantity: number;
-}
-
-interface CustomerInfo {
-  name: string;
-  phone: string;
-  email: string;
-  orderType: 'dine-in' | 'takeaway' | 'delivery';
-  tableNumber?: string;
-  deliveryAddress?: string;
-  paymentMethod: 'cash' | 'card' | 'online';
-  specialInstructions?: string;
-}
-
-interface UserProfile {
-  id?: string;
-  name: string;
-  phone: string;
-  email: string;
-  defaultAddress?: string;
-  createdAt?: any;
-}
-
-interface Order {
-  id: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail: string | null;
-  items: {
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
-  }[];
-  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
-  tableNumber: string | null;
-  totalAmount: number;
-  paymentMethod: string;
-  paymentStatus: string;
-  specialInstructions: string | null;
-  createdAt: any;
-  updatedAt: any;
-  orderType: string;
-  deliveryAddress: string | null;
-}
-
 // Main App Component with Routing
 export const RestaurantApp: FC = () => {
   const [currentPage, setCurrentPage] = useState<'home' | 'profile' | 'orders'>('home');;
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-  const navigate = useNavigate();
-
-  // Mock user ID - in a real app, this would come from authentication
-  const userId = "user123"; 
-
-  useEffect(() => {
-      const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-        if (currentUser) {
-          const userDetails: User = {
-            uid: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName,
-            photoURL: currentUser.photoURL,
-          };
-          setUser(userDetails);
-        } else {
-          setUser(null);
-          navigate("/admin/login");
-        }
-      });
-  
-      return () => unsubscribe();
-    }, [navigate]);
   
   // Render the page based on the current page state
   const renderPage = () => {
@@ -107,11 +24,11 @@ export const RestaurantApp: FC = () => {
       case 'home':
         return <FoodOrderingPage />;
       case 'profile':
-        return <ProfilePage userProfile={user} setUserProfile={setUser} />;
+        return <ProfilePage />;
       case 'orders':
         return <OrdersPage userId={userId} />;
       default:
-        return <FoodOrderingPage userProfile={userProfile} />;
+        return <FoodOrderingPage />;
     }
   };
   

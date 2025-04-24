@@ -44,7 +44,7 @@ interface Order {
 
 export const OrdersPage: FC<{
     userId: string;
-  }> = ({ userId }) => {
+  }> = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     

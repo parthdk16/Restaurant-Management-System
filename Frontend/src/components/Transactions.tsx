@@ -410,7 +410,7 @@ export const TransactionHistory: FC = () => {
                 <CalendarComponent
                   mode="range"
                   selected={dateRange}
-                  onSelect={setDateRange}
+                  onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
                   initialFocus
                 />
                 <div className="flex items-center justify-between p-3 border-t">

@@ -246,7 +246,7 @@ export const DeliveryDashboard: FC = () => {
 
       {/* Main content */}
       <main className="flex-1 p-6 bg-gray-50 overflow-auto">
-        <Tabs defaultValue="assigned" className="w-full" onValueChange={setCurrentTab}>
+        <Tabs defaultValue="assigned" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
           <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
             <TabsTrigger value="assigned">My Deliveries</TabsTrigger>
             <TabsTrigger value="available">Available Orders</TabsTrigger>

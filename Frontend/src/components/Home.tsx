@@ -11,8 +11,6 @@ import {
   Card,
   CardContent,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -88,7 +86,6 @@ export const HomePage: FC = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'veg' | 'non-veg' | 'popular'>('all');
   const [showUpiOptions, setShowUpiOptions] = useState(false);
   const [upiId, setUpiId] = useState('');
-  const [showQrCode, setShowQrCode] = useState(false);
   const [paymentMode, setPaymentMode] = useState('');
   const [upiIdError, setUpiIdError] = useState('');
   const [upiPaymentInitiated, setUpiPaymentInitiated] = useState(false);
@@ -297,7 +294,6 @@ export const HomePage: FC = () => {
       setUpiId('');
       setUpiIdError('');
       setUpiPaymentInitiated(false);
-      setShowQrCode(false);
       
       Swal.fire({
         title: "Payment Successful!",
@@ -948,7 +944,6 @@ export const HomePage: FC = () => {
                       className="flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer hover:border-primary transition-all"
                       onClick={() => {
                         setPaymentMode('qr');
-                        setShowQrCode(true);
                       }}
                     >
                       <div className="size-12 flex items-center justify-center rounded-full bg-purple-100 mb-2">

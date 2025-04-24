@@ -52,7 +52,7 @@ export const Dashboard: FC = () => {
   });
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  const [areaChartData, setAreaChartData] = useState<ChartData[]>([]);
+  // const [areaChartData, setAreaChartData] = useState<ChartData[]>([]);
   const [transactionChartData, setTransactionChartData] = useState<ChartData[]>([]);
 
   const navigate = useNavigate();
@@ -213,17 +213,18 @@ export const Dashboard: FC = () => {
   };
 
   useEffect(() => {
-    fetchOrderCountLast6Months().then((counts) => {
-      if (counts) {
-        const areaChartData = counts.postCounts.map((posts, idx) => ({
-          month: new Date(new Date().setMonth(new Date().getMonth() - (5 - idx))).toLocaleString('default', { month: 'long' }),
-          sales: posts,
-        }));
-        // console.log("Post counts for the last 6 months:", counts);
-        // console.log("Area chart data:", areaChartData);
-        setAreaChartData(areaChartData);
-      }
-    });
+    fetchOrderCountLast6Months()
+    // .then((counts) => {
+    //   if (counts) {
+    //     const areaChartData = counts.postCounts.map((posts, idx) => ({
+    //       month: new Date(new Date().setMonth(new Date().getMonth() - (5 - idx))).toLocaleString('default', { month: 'long' }),
+    //       sales: posts,
+    //     }));
+    //     // console.log("Post counts for the last 6 months:", counts);
+    //     // console.log("Area chart data:", areaChartData);
+    //     setAreaChartData(areaChartData);
+    //   }
+    // });
     
     // Fetch transaction data for the last 6 months
     fetchTransactionsLast6Months();

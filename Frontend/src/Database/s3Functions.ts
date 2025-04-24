@@ -8,7 +8,7 @@ interface CustomFile {
   
   export const uploadFileToS3 = async (file: CustomFile): Promise<string> => {
     const params = {
-      Bucket: process.env.S3_BUCKET,
+      Bucket: process.env.S3_BUCKET || (() => { throw new Error("S3_BUCKET environment variable is not defined"); })(),
       Key: `uploads/${file.originalname}`,
       Body: file.buffer,
       ContentType: file.mimetype,

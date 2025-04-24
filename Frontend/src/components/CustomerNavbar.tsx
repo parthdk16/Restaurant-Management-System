@@ -24,7 +24,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/components/AuthProvider";
 import logo from '@/assets/logoLandscape.png';
 import { auth } from "@/Database/FirebaseConfig";
 import { signOut } from "firebase/auth";
@@ -42,7 +41,6 @@ interface User {
 }
 
 export const Navbar: FC<NavbarProps> = ({ cartItemCount, onCartClick }) => {
-  const { logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   
@@ -72,9 +70,9 @@ export const Navbar: FC<NavbarProps> = ({ cartItemCount, onCartClick }) => {
 
   const navItems = [
     { name: "Home", icon: <Home className="mr-2 size-4" />, path: "/" },
-    { name: "My Orders", icon: <ClipboardList className="mr-2 size-4" />, path: "/orders-user" },
+    { name: "My Orders", icon: <ClipboardList className="mr-2 size-4" />, path: "/my-profile" },
     { name: "Favorites", icon: <Heart className="mr-2 size-4" />, path: "/favorites" },
-    { name: "Profile", icon: <User className="mr-2 size-4" />, path: "/profile-user" },
+    { name: "Profile", icon: <User className="mr-2 size-4" />, path: "/my-profile" },
   ];
 
   const userInitials = user?.displayName 
@@ -170,13 +168,13 @@ export const Navbar: FC<NavbarProps> = ({ cartItemCount, onCartClick }) => {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/profile-user" className="cursor-pointer">
+                  <Link to="/my-profile" className="cursor-pointer">
                     <User className="mr-2 size-4" />
                     Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/orders-user" className="cursor-pointer">
+                  <Link to="/my-profile" className="cursor-pointer">
                     <ClipboardList className="mr-2 size-4" />
                     My Orders
                   </Link>

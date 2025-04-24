@@ -1,14 +1,38 @@
 import { FC, useEffect, useState } from "react";
-import { ArrowRight, Clock, MapPin, Phone, Instagram, Facebook, Star, ChevronRight, MessageSquare, LogIn, UserPlus } from "lucide-react";
+import { ArrowRight, Clock, MapPin, Phone, Instagram, Facebook, Star, ChevronRight, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from '@/assets/logoLandscape.png';
+import { db } from "@/Database/FirebaseConfig";
+import { query, collection, getDocs, limit } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+
+interface Testimonial {
+  id: string;
+  name?: string;
+  comment?: string;
+  rating?: number;
+  imageUrl?: string;
+}
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  photoURL?: string;
+  photoKey?: string;
+  isAvailable: boolean;
+  isVegetarian: boolean;
+  itemCode?: string; 
+}
 
 export const RestaurantLandingPage: FC = () => {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [specialties, setSpecialties] = useState([]);
-  const [testimonials, setTestimonials] = useState([]);
-  const [features, setFeatures] = useState([]);
+  const [specialties, setSpecialties] = useState<MenuItem[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = 'Hotel Shripad';
@@ -18,53 +42,38 @@ export const RestaurantLandingPage: FC = () => {
   const fetchData = async () => {
     try {
       // Fetch specialties from Firestore
-      const specialtiesSnapshot = await db.collection('specialties').get();
-      const specialtiesData = specialtiesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const specialtiesQuery = query(collection(db, 'Menu'), limit(4));
+      const specialtiesDocs = await getDocs(specialtiesQuery);
+      const specialtiesData = specialtiesDocs.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || '',
+          description: data.description || '',
+          price: data.price || 0,
+          category: data.category || '',
+          photoURL: data.photoURL || '',
+          photoKey: data.photoKey || '',
+          isAvailable: data.isAvailable || false,
+          isVegetarian: data.isVegetarian || false,
+          itemCode: data.itemCode || ''
+        } as MenuItem;
+      });
       setSpecialties(specialtiesData);
 
       // Fetch testimonials from Firestore
-      const testimonialsSnapshot = await db.collection('testimonials').get();
-      const testimonialsData = testimonialsSnapshot.docs.map(doc => ({
+      const testimonialsQuery = query(collection(db, 'Testimonials'));
+      const testimonialsDocs = await getDocs(testimonialsQuery);
+      const testimonialsData = testimonialsDocs.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       setTestimonials(testimonialsData);
 
-      // Fetch features from Firestore
-      const featuresSnapshot = await db.collection('features').get();
-      const featuresData = featuresSnapshot.docs.map(doc => {
-        const data = doc.data();
-        // Convert icon string to component
-        const iconComponent = getIconComponent(data.iconName);
-        return {
-          id: doc.id,
-          ...data,
-          icon: iconComponent
-        };
-      });
-      setFeatures(featuresData);
-
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
       setLoading(false);
-    }
-  };
-
-  // Function to convert icon name strings to components
-  const getIconComponent = (iconName) => {
-    switch (iconName) {
-      case 'Clock':
-        return <Clock className="size-8" />;
-      case 'Star':
-        return <Star className="size-8" />;
-      case 'MessageSquare':
-        return <MessageSquare className="size-8" />;
-      default:
-        return <Star className="size-8" />;
     }
   };
 
@@ -149,33 +158,13 @@ export const RestaurantLandingPage: FC = () => {
               <div className="relative">
                 <div className="w-64 h-64 md:w-80 md:h-80 bg-teal-100 rounded-full absolute top-0 left-0 transform -translate-x-1/4 -translate-y-1/4" />
                 <div className="w-48 h-48 md:w-64 md:h-64 bg-amber-100 rounded-full absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4" />
-                <img 
+                <img
                   src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/fa4944f0cfdcbca2bec1f3ab8e3db3f7" 
                   alt="Featured Dish" 
                   className="w-80 h-80 object-cover rounded-full relative z-10 border-8 border-white shadow-xl"
                 />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature) => (
-              <div 
-                key={feature.id} 
-                className="bg-gradient-to-br from-teal-50 to-cyan-50 p-8 rounded-xl shadow-sm border border-teal-100 text-center"
-              >
-                <div className="mx-auto bg-teal-100 w-16 h-16 flex items-center justify-center rounded-full text-teal-600 mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -196,9 +185,9 @@ export const RestaurantLandingPage: FC = () => {
                 key={dish.id} 
                 className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
               >
-                <div className="h-48 bg-gray-100">
+                <div className="h-48 bg-gray-100" key={index}>
                   <img 
-                    src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/fa4944f0cfdcbca2bec1f3ab8e3db3f7`} 
+                    src={dish.photoURL || `https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/fa4944f0cfdcbca2bec1f3ab8e3db3f7`} 
                     alt={'Featured Dish'}
                     className="w-full h-full object-cover"
                   />
@@ -206,18 +195,18 @@ export const RestaurantLandingPage: FC = () => {
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center">
-                      <span className={`w-3 h-3 rounded-full ${dish.isVeg ? 'bg-green-500' : 'bg-red-500'} mr-2`}></span>
+                      <span className={`w-3 h-3 rounded-full ${dish.isVegetarian ? 'bg-green-500' : 'bg-red-500'} mr-2`}></span>
                       <h3 className="font-semibold text-lg">{dish.name}</h3>
                     </div>
                     <div className="flex items-center bg-amber-50 px-2 py-1 rounded text-amber-700">
                       <Star className="size-3 fill-amber-500 text-amber-500 mr-1" />
-                      <span className="text-sm font-medium">{dish.rating}</span>
+                      <span className="text-sm font-medium">{dish.price}</span>
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm mb-4">{dish.description}</p>
+                  <div className="text-gray-600 text-sm mb-4" dangerouslySetInnerHTML={{ __html: dish.description }} />
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-lg">₹{dish.price}</span>
-                    <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 hover:bg-teal-50">
+                    <Button onClick={() => navigate('/login')} variant="outline" size="sm" className="text-teal-600 border-teal-600 hover:bg-teal-50">
                       Add to Cart
                     </Button>
                   </div>
@@ -227,7 +216,7 @@ export const RestaurantLandingPage: FC = () => {
           </div>
 
           <div className="text-center mt-10">
-            <Button className="bg-teal-600 hover:bg-teal-700">
+            <Button onClick={() => navigate('/login')} className="bg-teal-600 hover:bg-teal-700">
               View Full Menu <ChevronRight className="ml-1 size-4" />
             </Button>
           </div>
@@ -275,6 +264,8 @@ export const RestaurantLandingPage: FC = () => {
               {testimonials.map((_, index) => (
                 <button
                   key={index}
+                  type="button"
+                  title="testimonials"
                   onClick={() => setActiveTestimonial(index)}
                   className={`w-3 h-3 rounded-full mx-1 ${
                     activeTestimonial === index ? 'bg-teal-600' : 'bg-gray-300'
@@ -318,10 +309,10 @@ export const RestaurantLandingPage: FC = () => {
                 Experience authentic Indian cuisine with a perfect blend of traditional flavors and modern presentation.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-white hover:text-teal-300">
+                <a title="instagram" href="#" className="text-white hover:text-teal-300">
                   <Instagram className="size-5" />
                 </a>
-                <a href="#" className="text-white hover:text-teal-300">
+                <a title="facebook" href="#" className="text-white hover:text-teal-300">
                   <Facebook className="size-5" />
                 </a>
               </div>

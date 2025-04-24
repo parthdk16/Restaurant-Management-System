@@ -78,7 +78,7 @@ interface FoodMenuItem {
 export const TableOrderPage: FC = () => {
   const [tables, setTables] = useState<TableItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [menuItems, setMenuItems] = useState<FoodMenuItem[]>([]);
+  // const [menuItems, setMenuItems] = useState<FoodMenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTable, setSelectedTable] = useState<TableItem | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -169,7 +169,7 @@ export const TableOrderPage: FC = () => {
         }
       });
       
-      setMenuItems(items);
+      // setMenuItems(items);
       console.log("Menu items fetched:", items);
     } catch (error) {
       console.error("Error fetching menu items:", error);
@@ -387,7 +387,7 @@ export const TableOrderPage: FC = () => {
         <h1 className="text-3xl font-bold text-center mb-2">Table Management</h1>
         <p className="text-center text-gray-500 mb-6">Manage tables and dine-in orders</p>
         
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'all' | 'available' | 'occupied' | 'reserved')} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="all">All Tables</TabsTrigger>
             <TabsTrigger value="available">Available</TabsTrigger>
@@ -479,7 +479,7 @@ export const TableOrderPage: FC = () => {
                   selectedOrder?.status === 'pending' ? 'outline' :
                   selectedOrder?.status === 'preparing' ? 'secondary' :
                   selectedOrder?.status === 'ready' ? 'default' :
-                  selectedOrder?.status === 'served' ? 'success' : 'outline'
+                  selectedOrder?.status === 'served' ? 'default' : 'outline'
                 }>
                   {selectedOrder?.status}
                 </Badge>
@@ -655,7 +655,7 @@ export const TableOrderPage: FC = () => {
                   <Label htmlFor="paymentMethod">Payment Method</Label>
                   <Select 
                     value={selectedPaymentMethod} 
-                    onValueChange={(value) => setSelectedPaymentMethod(value as any)}
+                    onValueChange={(value: 'cash' | 'card' | 'online') => setSelectedPaymentMethod(value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select payment method" />
@@ -718,7 +718,7 @@ const TableCard: FC<{
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Table {table.number}</CardTitle>
           <Badge variant={
-            table.status === 'available' ? 'success' :
+            table.status === 'available' ? 'default' :
             table.status === 'occupied' ? 'destructive' :
             table.status === 'reserved' ? 'default' : 'outline'
           }>
@@ -739,7 +739,7 @@ const TableCard: FC<{
               order.status === 'pending' ? 'outline' :
               order.status === 'preparing' ? 'secondary' :
               order.status === 'ready' ? 'default' :
-              order.status === 'served' ? 'success' : 'outline'
+              order.status === 'served' ? 'default' : 'outline'
             } className="mt-1">
               {order.status}
             </Badge>

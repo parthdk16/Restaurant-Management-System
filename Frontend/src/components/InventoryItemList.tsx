@@ -37,6 +37,11 @@ interface User {
   photoURL: string | null;
 }
 
+interface StockStatus { 
+  label: string;
+  variant: "destructive" | "warning" | "success"
+}
+
 export const InventoryItemList: FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
@@ -445,7 +450,8 @@ export const InventoryItemList: FC = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredItems.map((item) => {
-                    const stockStatus = getStockStatus(item);
+                    const stockStatus: StockStatus = getStockStatus(item);
+                    console.log(stockStatus);
                     return (
                       <TableRow key={item.id}>
                         <TableCell>

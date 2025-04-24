@@ -23,6 +23,7 @@ import { DeliveryDashboard } from './components/DeliveryDashboard';
 import { HomePage } from './components/Home';
 import ProfilePage from './components/CustomerProfile';
 import { OrdersPage } from './components/MyOrders';
+import DeliveryD from './components/Delivery';
 
 const App: React.FC = () => {
   return (
@@ -48,9 +49,10 @@ const App: React.FC = () => {
           <Route path="/manage-inventory" element={ <InventoryItemList/>} />
           <Route path="/orders-user" element={ <OrdersPage userId=''/>} />
           <Route path="/home" element={ <HomePage/>} />
-          <Route path="/profile-user" element={ <ProfilePage/>} />
+          <Route path="/my-profile" element={ <ProfilePage/>} />
           <Route path="/delivery/login" element={ <DeliverySignIn/>} />
-          <Route path="/delivery/dashboard" element={ <DeliveryDashboard/>} />
+          <Route path="/delivery/dashboard" element={ <DeliveryD/>} />
+          <Route path="/del-person" element={ <DeliveryD/>} />
           <Route path="*" element={<NotFound />} />
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute> } />
         </Routes>

@@ -119,8 +119,6 @@ export const InventoryItemForm: FC<InventoryItemFormProps> = ({ isEditing, editI
           description: "Inventory item updated successfully",
         });
       } else {
-        // Add new item
-        const docRef = await addDoc(collection(db, "Inventory"), itemData);
         
         // Create history record
         await addDoc(collection(db, "InventoryHistory"), {

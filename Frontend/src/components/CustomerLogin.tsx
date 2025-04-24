@@ -32,7 +32,7 @@ export const CustomerLogin: FC = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        navigate('/restaurant');
+        navigate('/food-order');
       }
     });
     return () => unsubscribe();
@@ -59,7 +59,7 @@ export const CustomerLogin: FC = () => {
       //   showConfirmButton: false,
       //   timer: 1500
       // });
-      navigate('/dashboard');
+      navigate('/food-order');
     } catch (error) {
       setError('Invalid email or password.');
       console.error("Sign in error:", error);
@@ -91,7 +91,7 @@ export const CustomerLogin: FC = () => {
       //   showConfirmButton: false,
       //   timer: 1500
       // });
-      navigate('/dashboard');
+      navigate('/food-order');
     } catch (error) {
       setError('Failed to sign in with Google.');
       console.error("Google sign-in error:", error);

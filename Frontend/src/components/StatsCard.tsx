@@ -1,4 +1,3 @@
-import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { IndianRupee, ListOrdered, Soup, UsersRound } from "lucide-react";
 

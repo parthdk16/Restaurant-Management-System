@@ -218,7 +218,7 @@ export const CreateDineInOrder: FC = () => {
         customerPhone,
         items: selectedItems,
         status: 'pending' as const,
-        tableNumber: selectedTable?.tableNumber,
+        tableNumber: selectedTable?.tableNo,
         totalAmount: calculateTotal(),
         paymentMethod: 'cash' as const, // Default to cash, can be updated later
         paymentStatus: 'unpaid' as const,

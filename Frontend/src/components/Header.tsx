@@ -39,7 +39,7 @@ export const Header: React.FC = () => {
         setUser(userDetails);
       } else {
         setUser(null);
-        navigate("/login");
+        navigate("/admin/login");
       }
     });
 
@@ -49,7 +49,7 @@ export const Header: React.FC = () => {
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
-    navigate("/login");
+    navigate("/admin/login");
   };
 
   return (
@@ -121,9 +121,7 @@ export const Header: React.FC = () => {
             {user?.displayName || "My Account"}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Profile Settings</DropdownMenuItem>
-          <DropdownMenuItem>Support</DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/profile')}>Profile Settings</DropdownMenuItem>
           <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { db } from "../Database/FirebaseConfig";
+import { auth, db } from "../Database/FirebaseConfig";
 import { collection, getDocs, addDoc, serverTimestamp, query, where } from "firebase/firestore";
 import Swal from 'sweetalert2';
 import {
@@ -44,6 +44,15 @@ import {
 import { ScrollArea } from "./ui/scroll-area";
 import QRImg from '@/assets/QR.png';
 import logo from '@/assets/logoLandscape.png';
+import { Navbar } from "./CustomerNavbar";
+import { useNavigate } from "react-router-dom";
+
+interface User {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
 
 interface FoodItem {
   id: string;
@@ -73,6 +82,7 @@ interface CustomerInfo {
 }
 
 export const FoodOrderingPage: FC = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -87,7 +97,7 @@ export const FoodOrderingPage: FC = () => {
     paymentMethod: 'cash',
     specialInstructions: ''
   });
-  const [orderPlaced, setOrderPlaced] = useState(false);
+  // const [orderPlaced, setOrderPlaced] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'veg' | 'non-veg' | 'popular'>('all');
   const [showUpiOptions, setShowUpiOptions] = useState(false);
@@ -96,6 +106,7 @@ export const FoodOrderingPage: FC = () => {
   const [paymentMode, setPaymentMode] = useState('');
   const [upiIdError, setUpiIdError] = useState('');
   const [upiPaymentInitiated, setUpiPaymentInitiated] = useState(false);
+  const navigate = useNavigate();
 
   // Calculate cart totals
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -103,6 +114,26 @@ export const FoodOrderingPage: FC = () => {
   const tax = subtotal * 0.05; // 5% tax
   const deliveryFee = customerInfo.orderType === 'delivery' ? 30 : 0;
   const total = subtotal + tax + deliveryFee;
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        const userDetails: User = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL,
+        };
+        setUser(userDetails);
+        console.log('userDetails', userDetails);
+      } else {
+        setUser(null);
+        navigate('/login')
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     fetchFoodItems();
@@ -140,6 +171,36 @@ export const FoodOrderingPage: FC = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchUserDoc = async () => {
+      try {
+         if (!user || !user.email) return;
+        const usersRef = collection(db, "Users");
+        const q = query(usersRef, where("email", "==", user.email));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data();
+          setCustomerInfo({
+            name: userData.name,
+            phone: userData.phone,
+            email: userData.email,
+            orderType: 'dine-in',
+            paymentMethod: 'cash',
+            deliveryAddress: userData.defaultAddress,
+          });
+        } else {
+          console.log("No matching user found.");
+        }
+      } catch (error) {
+        console.error("Error fetching user document:", error);
+      }
+    };
+
+    fetchUserDoc();
+
+  }, [user]);
 
   const addToCart = (item: FoodItem) => {
     setCart(prevCart => {
@@ -281,7 +342,7 @@ export const FoodOrderingPage: FC = () => {
       // Add transaction to Transactions collection
       await addDoc(collection(db, "Transactions"), transactionData);
         
-      setOrderPlaced(true);
+      // setOrderPlaced(true);
       setCart([]);
       
       // Close all dialogs
@@ -354,7 +415,7 @@ export const FoodOrderingPage: FC = () => {
       
       await addDoc(collection(db, "Orders"), orderData);
       
-      setOrderPlaced(true);
+      // setOrderPlaced(true);
       setCart([]);
       
       Swal.fire({
@@ -404,11 +465,12 @@ export const FoodOrderingPage: FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50">
+      <Navbar cartItemCount={cartItemCount} onCartClick={() => setIsCartOpen(true)} />
       <header className="mb-8">
-      <div className="relative flex items-center mb-4">
-        <img src={logo} alt="logo" className="absolute left-0 w-32 h-auto" />
-        <h1 className="mx-auto text-5xl font-bold text-center">Hotel Shripad</h1>
-      </div>
+        <div className="relative flex items-center mb-4">
+          <img src={logo} alt="logo" className="absolute left-0 w-32 h-auto" />
+          <h1 className="mx-auto text-5xl font-bold text-black text-center">Hotel Shripad</h1>
+        </div>
         <p className="text-center text-black text-lg mb-6">Order delicious food for delivery, takeaway, or dine-in</p>
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -416,7 +478,7 @@ export const FoodOrderingPage: FC = () => {
             <Input
               type="text"
               placeholder="Search menu..."
-              className="w-full p-2 pl-10 border rounded-lg"
+              className="w-full p-2 pl-10 border rounded-lg text-black"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -687,6 +749,7 @@ export const FoodOrderingPage: FC = () => {
             <div>
               <Label htmlFor="orderType">Order Type</Label>
               <Select 
+                defaultValue="delivery"
                 value={customerInfo.orderType} 
                 onValueChange={(value) => handleSelectChange('orderType', value)}
               >

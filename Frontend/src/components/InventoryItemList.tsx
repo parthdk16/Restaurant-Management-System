@@ -19,6 +19,9 @@ import Swal from 'sweetalert2';
 import { useTheme } from './theme-provider';
 import Loader1 from "@/components/Loader";
 import { InventoryItem, InventoryItemForm } from "./ManageInventory";
+import { Sidebar } from "./Sidebar";
+import { Header } from "./Header";
+import { useNavigate } from "react-router-dom";
 
 interface FilterOptions {
   category: string;
@@ -27,7 +30,15 @@ interface FilterOptions {
   searchQuery: string;
 }
 
+interface User {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
+
 export const InventoryItemList: FC = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +53,26 @@ export const InventoryItemList: FC = () => {
   });
   const { toast } = useToast();
   const { theme } = useTheme();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+        if (currentUser) {
+          const userDetails: User = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+            photoURL: currentUser.photoURL,
+          };
+          setUser(userDetails);
+        } else {
+          setUser(null);
+          navigate("/admin/login");
+        }
+      });
+  
+      return () => unsubscribe();
+    }, [navigate]);
 
   const sweetAlertOptions: Record<string, unknown> = {
     background: theme === "dark" ? 'rgba(0, 0, 0, 0.9)' : '#fff',
@@ -276,6 +307,11 @@ export const InventoryItemList: FC = () => {
   };
 
   return (
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
+          <Sidebar user={user} activePage="inventory" />
+          <div className="flex flex-col h-screen">
+            <Header />
+            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -487,5 +523,9 @@ export const InventoryItemList: FC = () => {
         </DialogContent>
       </Dialog>
     </>
+    </main>
+            {loading && <Loader1/>} 
+          </div>
+        </div>
   );
 };

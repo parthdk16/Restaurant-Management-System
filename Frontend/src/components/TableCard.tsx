@@ -82,12 +82,12 @@ export function TableCard({
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [currentTab, setCurrentTab] = useState("status");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [showBill, setShowBill] = useState(false);
+  // const [showBill, setShowBill] = useState(false);
   const [splitBill, setSplitBill] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "upi">("cash");
-  const [transactionDetails, setTransactionDetails] = useState<TransactionDetails>({
-    paymentMethod: "cash"
-  });
+  // const [transactionDetails, setTransactionDetails] = useState<TransactionDetails>({
+  //   paymentMethod: "cash"
+  // });
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [cashAmount, setCashAmount] = useState("");
@@ -96,7 +96,7 @@ export function TableCard({
   const [upiId, setUpiId] = useState("");
   const [upiReference, setUpiReference] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  // const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showUpiOptions, setShowUpiOptions] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'' | 'qr' | 'upi-id'>('');
@@ -215,7 +215,7 @@ export function TableCard({
       // Once transaction is recorded, proceed with order completion
       await completeOrder(paymentDetails);
       
-      setPaymentSuccess(true);
+      // setPaymentSuccess(true);
       setShowSuccessDialog(true);
     } catch (error) {
       console.error("Error processing payment:", error);
@@ -270,7 +270,7 @@ export function TableCard({
       setOrderItems([]);
       setCustomerName("");
       setNumberOfGuests(1);
-      setShowBill(false);
+      // setShowBill(false);
       resetPaymentDetails();
       setCurrentTab("status");
       onStatusChange(id, "available");
@@ -288,7 +288,7 @@ export function TableCard({
     setUpiReference("");
     setCustomerEmail("");
     setCustomerPhone("");
-    setTransactionDetails({ paymentMethod: "cash" });
+    // setTransactionDetails({ paymentMethod: "cash" });
   };
 
   // Fetch menu items from Firestore
@@ -419,7 +419,7 @@ export function TableCard({
   };
 
   const generateBill = () => {
-    setShowBill(true);
+    // setShowBill(true);
     setCurrentTab("bill");
   };
 
@@ -509,7 +509,10 @@ export function TableCard({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}> 
         <DialogTrigger asChild>
           <Card 
-            className="w-full min-w-[350px] min-h-[150px] max-w-[350px] rounded-lg border bg-white text-gray-800 shadow-sm cursor-pointer transition-transform duration-200 ease-in-out transform hover:scale-105 hover:shadow-lg hover:border hover:border-gray-300 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600 flex flex-col justify-between"
+            className={`w-full min-w-[350px] min-h-[150px] max-w-[350px] rounded-lg border bg-white text-gray-800 
+              shadow-sm cursor-pointer transition-transform duration-200 ease-in-out transform hover:scale-105 hover:shadow-lg
+              hover:border hover:border-gray-300 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600 flex flex-col 
+              justify-between ${status === "available" ? "border-green-500" : status === "reserved" ? "border-blue-500" : "border-red-500"}`}
             onClick={() => setIsDialogOpen(true)}
           >
             <CardHeader className="flex-grow flex items-center justify-center p-4">

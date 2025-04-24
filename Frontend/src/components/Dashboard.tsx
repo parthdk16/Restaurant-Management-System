@@ -334,17 +334,6 @@ export const Dashboard: FC = () => {
             </Card>
             <AreaChartComponent data={transactionChartData} />
           </div>
-          {/* <div className="grid gap-4 md:gap-8 grid-cols-1">
-            <Card className="flex flex-col">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold leading-none tracking-tight">Posts Overview</CardTitle>
-                <CardDescription>Post activity over the last 6 months</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AreaChartComponent data={areaChartData} />
-              </CardContent>
-            </Card>
-          </div> */}
         </main>
         {loading && <Loader1/>} 
       </div>

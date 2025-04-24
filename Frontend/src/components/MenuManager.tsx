@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 import { useTheme } from './theme-provider';
 import { Header } from "./Header";
 import ReactQuill from "react-quill";
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,8 +30,6 @@ const s3Client = new S3Client({
     secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
   }
 });
-
-const S3_BUCKET = import.meta.env.AWS_BUCKET_NAME;
 
 interface MenuItem {
   id: string;
@@ -146,7 +144,7 @@ export const ManageMenu: FC = () => {
       const query = filterOptions.searchQuery.toLowerCase();
       result = result.filter(item => 
         item.name.toLowerCase().includes(query) || 
-        (item.itemCode && item.itemCode.toLowerCase().includes(query))
+        (item.itemCode && String(item.itemCode).toLowerCase().includes(query))
       );
     }
     
@@ -218,40 +216,40 @@ export const ManageMenu: FC = () => {
     setIsEditDialogOpen(true);
   };
 
-  const uploadToS3 = async (file: File, key: string): Promise<{url: string, key: string}> => {
-    setUploadingPhoto(true);
+  // const uploadToS3 = async (file: File, key: string): Promise<{url: string, key: string}> => {
+  //   setUploadingPhoto(true);
 
-    try {
+  //   try {
 
-      const blob = new Blob([file], { type: file.type });
+  //     const blob = new Blob([file], { type: file.type });
 
-      // Create the upload command
-      const uploadParams = {
-        Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
-        Key: key,
-        Body: blob,
-        ContentType: file.type,
-        ACL: 'public-read' as const
-      };
+  //     // Create the upload command
+  //     const uploadParams = {
+  //       Bucket: import.meta.env.VITE_AWS_BUCKET_NAME,
+  //       Key: key,
+  //       Body: blob,
+  //       ContentType: file.type,
+  //       ACL: 'public-read' as const
+  //     };
 
-      // Execute the upload
-      const command = new PutObjectCommand(uploadParams);
-      await s3Client.send(command);
+  //     // Execute the upload
+  //     const command = new PutObjectCommand(uploadParams);
+  //     await s3Client.send(command);
 
-      // Construct the URL (S3 pattern is predictable)
-      const url = `https://hotel-shripad.s3.us-east-1.amazonaws.com/${key}`;
+  //     // Construct the URL (S3 pattern is predictable)
+  //     const url = `https://hotel-shripad.s3.us-east-1.amazonaws.com/${key}`;
       
-      return {
-        url,
-        key
-      };
-    } catch (error) {
-      console.error("Error uploading to S3: ", error);
-      throw error;
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
+  //     return {
+  //       url,
+  //       key
+  //     };
+  //   } catch (error) {
+  //     console.error("Error uploading to S3: ", error);
+  //     throw error;
+  //   } finally {
+  //     setUploadingPhoto(false);
+  //   }
+  // };
 
   const deleteFromS3 = async (key: string): Promise<void> => {
     try {

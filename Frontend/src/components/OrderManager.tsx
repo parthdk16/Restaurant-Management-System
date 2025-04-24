@@ -241,7 +241,7 @@ export const ManageOrders: FC = () => {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[230px_1fr]">
       <Sidebar user={user} activePage="order-manager" />
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen sticky top-0">
         <Header />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto scrollbar-hide">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -303,7 +303,7 @@ export const ManageOrders: FC = () => {
 
           {/* Orders List */}
           <Tabs defaultValue="all">
-            <TabsList>
+            <TabsList className="sticky top-0 z-10">
               <TabsTrigger value="all">All Orders</TabsTrigger>
               <TabsTrigger value="active">Active Orders</TabsTrigger>
               <TabsTrigger value="completed">Completed & Cancelled</TabsTrigger>
@@ -514,6 +514,7 @@ const OrdersTable: FC<{
       </div>
     );
   }
+  console.log(window.innerHeight);
 
   return (
     <div className="w-full overflow-x-auto">
